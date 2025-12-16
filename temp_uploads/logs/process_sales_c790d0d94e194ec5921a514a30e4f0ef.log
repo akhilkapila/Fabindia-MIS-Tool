@@ -1,0 +1,4 @@
+2025-12-09 15:24:11,945 - INFO - Starting process: process_sales
+2025-12-09 15:24:11,946 - INFO - Received sales process request
+2025-12-09 15:30:56,044 - INFO - Saved processed sales to temp_uploads\ad773bbe-5049-403a-93aa-e60648809e64_sales.xlsx
+2025-12-09 15:35:10,499 - INFO - Saved post-processed workbook: temp_uploads\ad773bbe-5049-403a-93aa-e60648809e64_sales.xlsx

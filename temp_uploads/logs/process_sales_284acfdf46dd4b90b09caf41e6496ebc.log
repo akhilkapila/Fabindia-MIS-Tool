@@ -1,0 +1,29 @@
+2025-12-11 12:24:29,120 - INFO - Starting process: process_sales
+2025-12-11 12:24:29,120 - INFO - Received sales process request
+2025-12-11 12:24:29,482 - INFO - Loading file: Processed_Sales (5).csv from sheet 'SalesReportAbstract' starting at row 6
+2025-12-11 12:24:30,636 - INFO - ✓ File loaded successfully - shape: (64863, 53)
+2025-12-11 12:24:30,636 - INFO - Loaded data - shape: (64863, 53), columns: ['1020', 'Karnataka and Goa', 'Bangalore CMH Road', '1020.1', '01-11-2025', '1.0', '0.0', '0.0.1', '25000.0', '0.0.2', '0.0.3', '0.0.4', '0.0.5', '0.0.6', '0.0.7', '25000.0.1', 'MASTERCARD', '0', '0.1', '0.0.8', '0.0.9', '0.0.10', '0.0.11', '0.0.12', '0.0.13', '0.0.14', '0.0.15', '0.2', '0.0.16', '0.0.17', '0.0.18', '25000.0.2', '25000.0.3', '560008.0', 'PPBP102025000149', 'Unnamed: 35', 'Unnamed: 36', 'Unnamed: 37', 'Unnamed: 38', 'Unnamed: 39', 'Unnamed: 40', '0.0.19', '0.0.20', '0.0.21', '0.0.22', 'Unnamed: 45', '0.0.23', 'Unnamed: 47', '0.0.24', 'Unnamed: 49', 'Unnamed: 50', 'Unnamed: 51', 'Unnamed: 52']
+2025-12-11 12:24:30,637 - INFO - ✓ Columns converted to uppercase: ['1020', 'KARNATAKA AND GOA', 'BANGALORE CMH ROAD', '1020.1', '01-11-2025', '1.0', '0.0', '0.0.1', '25000.0', '0.0.2']...
+2025-12-11 12:24:30,638 - INFO - ✓ Mappings loaded successfully
+2025-12-11 12:24:30,638 - INFO - ✓ Rename map created with 0 mappings
+2025-12-11 12:24:30,672 - INFO - ✓ After rename: shape=(64863, 53)
+2025-12-11 12:24:30,687 - INFO - ✓ After reindex: shape=(64863, 53), has 53 columns
+2025-12-11 12:24:30,847 - DEBUG - Copied column AlternateStoreCode to StoreCode
+2025-12-11 12:24:30,923 - DEBUG - Removed 'BP' prefix from StoreCode
+2025-12-11 12:24:30,991 - DEBUG - Removed 'BP' prefix from AlternateStoreCode
+2025-12-11 12:24:31,090 - INFO - Removed 0 rows with prefixes ('97', '98')
+2025-12-11 12:24:31,174 - INFO - Saving sales dataframe to Excel: shape=(64863, 53)
+2025-12-11 12:25:56,324 - INFO - Saved processed sales to temp_uploads\01e2c8f9-a8d7-4de9-b9a9-9b88786f7fc5_sales.xlsx
+2025-12-11 12:25:56,324 - INFO - Output dataframe shape: (64863, 53), rows: 64863
+2025-12-11 12:25:56,325 - INFO - File size after save: 8982854 bytes
+2025-12-11 12:25:56,325 - INFO - Starting post-processing...
+2025-12-11 12:26:38,574 - INFO - Post-processing 'Sheet1': rows 2-64864, cols 1-53
+2025-12-11 12:26:38,611 - DEBUG - Column 1 ('AlternateStoreCode'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 12:26:38,912 - DEBUG - Column 3 ('StoreName'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 12:26:39,251 - DEBUG - Column 4 ('StoreCode'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 12:26:50,867 - INFO - ✓ Post-processing complete: temp_uploads\01e2c8f9-a8d7-4de9-b9a9-9b88786f7fc5_sales.xlsx
+2025-12-11 12:26:50,868 - INFO - Post-processing completed successfully
+2025-12-11 12:26:50,868 - INFO - File size after post-processing: 674673 bytes
+2025-12-11 12:26:50,868 - INFO - Reading file from disk to send to client: temp_uploads\01e2c8f9-a8d7-4de9-b9a9-9b88786f7fc5_sales.xlsx
+2025-12-11 12:26:50,870 - INFO - Successfully read file from disk: 674673 bytes
+2025-12-11 12:26:50,870 - INFO - Sending file to user

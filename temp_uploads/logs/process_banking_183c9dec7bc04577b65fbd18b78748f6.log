@@ -1,0 +1,15 @@
+2025-12-09 17:58:23,304 - INFO - Starting process: process_banking
+2025-12-09 17:58:23,304 - INFO - Received banking process request
+2025-12-09 17:58:27,637 - INFO - Saved banking workbook to temp_uploads\980be65d-070d-4889-a24a-11f1cc89f716_banking.xlsx
+2025-12-09 17:58:27,946 - INFO - Post-processing sheet 'Banking' rows 3-867 cols 1-10
+2025-12-09 17:58:28,246 - INFO - Column 1 ('Bank Name') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 17:58:28,524 - INFO - Column 2 ('Mode') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 17:58:29,276 - INFO - Column 3 ('Transaction Date') detected as date (date_frac=1.00, num_frac=0.00)
+2025-12-09 17:58:30,610 - INFO - Column 4 ('Bank Credit Date') detected as date (date_frac=1.00, num_frac=0.00)
+2025-12-09 17:58:31,771 - INFO - Column 5 ('SAP Code') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 17:58:32,192 - INFO - Column 6 ('Amount') detected as numeric (date_frac=0.07, num_frac=1.00)
+2025-12-09 17:58:32,729 - INFO - Column 7 ('Transaction Amount') detected as numeric (date_frac=0.07, num_frac=1.00)
+2025-12-09 17:58:33,067 - INFO - Column 8 ('Bank Charges') detected as numeric (date_frac=0.01, num_frac=1.00)
+2025-12-09 17:58:33,468 - INFO - Column 9 ('GST') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 17:58:33,898 - INFO - Column 10 ('MID') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 17:58:34,287 - INFO - Saved post-processed workbook: temp_uploads\980be65d-070d-4889-a24a-11f1cc89f716_banking.xlsx

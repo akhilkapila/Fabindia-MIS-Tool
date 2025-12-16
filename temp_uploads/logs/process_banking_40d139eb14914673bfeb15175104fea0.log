@@ -1,0 +1,15 @@
+2025-12-11 19:06:16,050 - INFO - Starting process: process_banking
+2025-12-11 19:06:16,052 - INFO - Received banking process request
+2025-12-11 19:06:31,253 - INFO - Saved banking workbook to temp_uploads\429fbb7a-117d-466f-a4bd-236ba99eba92_banking.xlsx
+2025-12-11 19:06:31,882 - INFO - Post-processing 'Banking': rows 3-1037, cols 1-10
+2025-12-11 19:06:32,015 - DEBUG - Column 1 ('Bank Name'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 19:06:32,088 - DEBUG - Column 2 ('Mode'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 19:06:32,115 - DEBUG - Column 3 ('Transaction Date'): date (date_frac=1.00, num_frac=0.00)
+2025-12-11 19:06:32,541 - DEBUG - Column 4 ('Bank Credit Date'): date (date_frac=1.00, num_frac=0.00)
+2025-12-11 19:06:33,564 - DEBUG - Column 5 ('SAP Code'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 19:06:33,700 - DEBUG - Column 6 ('Amount'): numeric (date_frac=0.07, num_frac=1.00)
+2025-12-11 19:06:33,857 - DEBUG - Column 7 ('Transaction Amount'): numeric (date_frac=0.05, num_frac=1.00)
+2025-12-11 19:06:33,967 - DEBUG - Column 8 ('Bank Charges'): numeric (date_frac=0.01, num_frac=1.00)
+2025-12-11 19:06:34,116 - DEBUG - Column 9 ('GST'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 19:06:34,215 - DEBUG - Column 10 ('MID'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 19:06:35,653 - INFO - ✓ Post-processing complete: temp_uploads\429fbb7a-117d-466f-a4bd-236ba99eba92_banking.xlsx

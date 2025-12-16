@@ -1,0 +1,395 @@
+/* Basic page setup */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0; /* Remove default padding */
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+}
+
+/* Main application container */
+.app-container {
+    width: 100%;
+    max-width: 900px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin: 20px; /* Add margin for spacing */
+}
+
+h1 {
+    text-align: center;
+    background-color: #f8f9fa;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Tab buttons container */
+.tab-container {
+    display: flex;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tab-button {
+    flex-grow: 1;
+    padding: 15px 20px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: #495057;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.tab-button:hover {
+    background-color: #e9ecef;
+}
+
+/* Style for the *active* tab button */
+.tab-button.active {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+    font-weight: 600;
+}
+
+/* Content for each tab */
+.tab-content {
+    display: none; /* Hide by default */
+    padding: 30px;
+    border-top: none;
+}
+
+.tab-content h2 {
+    margin-top: 0;
+    color: #343a40;
+}
+
+/* File input style */
+.file-input {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.file-input:hover {
+    border-color: #007bff;
+}
+
+/* Button styling */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+/* Generic button for process/download */
+.btn-process {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-process:hover {
+    background-color: #0056b3;
+}
+
+/* Final process button */
+.btn-final {
+    background-color: #28a745;
+}
+.btn-final:hover {
+    background-color: #1e7e34;
+}
+
+/* Navigation buttons (Next/Prev) */
+.btn-nav {
+    background: none;
+    border: 1px solid #ced4da;
+    color: #495057;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-nav:hover {
+    background-color: #f1f3f5;
+}
+
+/* --- STYLES FOR BANKING TAB (DROPDOWN) --- */
+
+/* Controls for adding a new bank */
+.bank-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Make the dropdown wider */
+.bank-controls .bank-dropdown {
+    flex-grow: 1; /* Takes up available space */
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #fdfdfd;
+}
+
+/* Make the 'Add' button fit its content */
+.bank-controls .btn-process {
+    flex-grow: 0;
+    white-space: nowrap; /* Stops text from wrapping */
+}
+
+/* Container for all the added bank boxes */
+#bank-uploads-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between each bank box */
+}
+
+/* Style for each individual bank box */
+.bank-upload-box {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    padding: 20px;
+    position: relative; /* Needed for the 'remove' button */
+}
+
+.bank-upload-box h3 {
+    margin-top: 0;
+    color: #6f42c1; /* Purple to match tab color */
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d9d9ff;
+}
+
+/* Layout for the inputs inside the box */
+.bank-upload-box-inputs {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+    align-items: flex-start;
+}
+.bank-upload-box-inputs .file-input,
+.bank-upload-box-inputs .date-input {
+    margin: 0; /* Override default margin */
+}
+
+/* File group styling */
+.bank-upload-box-inputs .file-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bank-upload-box-inputs .file-group .file-input {
+    border: 2px dashed #6f42c1;
+    background-color: #f8f5ff;
+}
+
+.bank-upload-box-inputs .file-group .file-input:hover {
+    border-color: #6f42c1;
+    background-color: #ede8ff;
+}
+
+/* Date range container styling */
+.date-group-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background-color: #f8f5ff;
+    border-radius: 6px;
+    border-left: 3px solid #6f42c1;
+}
+
+/* Date inputs row */
+.date-inputs-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.date-inputs-row .date-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #b8a8d8;
+    border-radius: 4px;
+    background-color: #ffffff;
+    font-size: 14px;
+}
+
+.date-inputs-row .date-input:focus {
+    outline: none;
+    border-color: #6f42c1;
+    background-color: #fafaf9;
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+}
+
+.date-inputs-row .separator {
+    color: #6f42c1;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* 'Remove' button (X) */
+.remove-bank-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+}
+.remove-bank-btn:hover {
+    color: #d9534f; /* Red on hover */
+}
+
+/* --- PROGRESS BAR STYLES --- */
+.progress-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* On top of everything */
+}
+
+.progress-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+}
+
+.progress-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.progress-container {
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    height: 25px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #007bff; /* Blue */
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-size: 1rem 1rem;
+    transition: width 0.4s ease;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+    from { background-position: 1rem 0; }
+    to { background-position: 0 0; }
+}
+
+#progress-text {
+    font-weight: bold;
+    color: #555;
+}
+
+/* Required Field Indicator */
+.required-mark {
+    color: #dc3545; /* Red color */
+    font-weight: bold;
+    margin-left: 3px;
+}
+
+.bank-input-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+.bank-upload-box-inputs {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr; /* File input wider than dates */
+    gap: 15px;
+    align-items: end; /* Align inputs to bottom if labels wrap */
+}
+
+/* File upload group styling */
+.file-upload-group {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.file-upload-group label {
+    margin-bottom: 8px;
+}
+
+.file-upload-group p {
+    margin: 5px 0;
+}
+
+/* Tab content improvements */
+.tab-content h2 {
+    color: #343a40;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.tab-content h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+/* Step section improvements */
+.tab-content > div[style*="border: 2px solid"] {
+    transition: all 0.3s ease;
+}
+
+.tab-content > div[style*="border: 2px solid"]:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

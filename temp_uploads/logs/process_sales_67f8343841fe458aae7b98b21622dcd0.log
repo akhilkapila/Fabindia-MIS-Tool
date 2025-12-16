@@ -1,0 +1,3 @@
+2025-12-11 12:15:04,538 - INFO - Starting process: process_sales
+2025-12-11 12:15:04,539 - INFO - Received sales process request
+2025-12-11 12:15:06,419 - INFO - Loading file: SalesReportAbstract (2).csv from sheet 'SalesReportAbstract' starting at row 6

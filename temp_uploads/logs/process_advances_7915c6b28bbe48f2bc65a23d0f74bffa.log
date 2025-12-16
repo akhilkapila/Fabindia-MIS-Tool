@@ -1,0 +1,88 @@
+2025-12-09 15:59:49,276 - INFO - Starting process: process_advances
+2025-12-09 15:59:49,276 - INFO - Received advances process request
+2025-12-09 16:03:52,882 - INFO - Saved combined Sales+Advances workbook to temp_uploads\031fc783-545e-4735-be80-0280f7a21979_advances_sales_combined.xlsx
+2025-12-09 16:05:51,820 - INFO - Post-processing sheet 'Sales' rows 2-49819 cols 1-53
+2025-12-09 16:06:04,107 - INFO - Column 1 ('AlternateStoreCode') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:06:37,018 - INFO - Column 2 ('RegionName') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:07:10,557 - INFO - Column 3 ('StoreName') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:07:23,145 - INFO - Column 4 ('StoreCode') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:08:24,373 - INFO - Column 5 ('BillDate') detected as date (date_frac=1.00, num_frac=0.00)
+2025-12-09 16:09:31,637 - INFO - Column 6 ('Quantity') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:09:49,744 - INFO - Column 7 ('Discount') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:10:19,450 - INFO - Column 8 ('DiscountPercentage') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:10:56,560 - INFO - Column 9 ('BaseValue') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:11:11,100 - INFO - Column 10 ('SGST') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:11:22,811 - INFO - Column 11 ('CGST') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:11:36,828 - INFO - Column 12 ('IGST') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:11:59,806 - INFO - Column 13 ('UTGST') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:12:20,722 - INFO - Column 14 ('Tax') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:12:32,458 - INFO - Column 15 ('Cash') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:12:48,402 - INFO - Column 16 ('Card') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:12:57,672 - INFO - Column 17 ('CreditCardType') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:13:07,593 - INFO - Column 18 ('Coupon') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:13:18,313 - INFO - Column 19 ('Credit') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:13:28,532 - INFO - Column 20 ('InsuranceCredit') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:13:43,326 - INFO - Column 21 ('CashAdvance') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:13:56,260 - INFO - Column 22 ('CreditCardAdvance') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:14:05,489 - INFO - Column 23 ('AdvancedAmount') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:14:14,991 - INFO - Column 24 ('GiftVoucher') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:14:27,454 - INFO - Column 25 ('CCNUsed') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:14:42,266 - INFO - Column 26 ('CCNIssued') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:14:52,613 - INFO - Column 27 ('PointsAllocated') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:03,647 - INFO - Column 28 ('PointsRedeemed') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:14,940 - INFO - Column 29 ('Cheque') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:22,053 - INFO - Column 30 ('PrepaidCard') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:28,657 - INFO - Column 31 ('OtherPayments') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:35,459 - INFO - Column 32 ('Amount') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:41,875 - INFO - Column 33 ('MRPTOTAL') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:15:48,502 - INFO - Column 34 ('PinCode') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:03,160 - INFO - Column 35 ('WSDN') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:16:04,979 - INFO - Column 36 ('Accentiv') fully blank - colored black
+2025-12-09 16:16:06,318 - INFO - Column 37 ('AM') fully blank - colored black
+2025-12-09 16:16:07,702 - INFO - Column 38 ('CA') fully blank - colored black
+2025-12-09 16:16:09,103 - INFO - Column 39 ('Cards') fully blank - colored black
+2025-12-09 16:16:10,524 - INFO - Column 40 ('MA') fully blank - colored black
+2025-12-09 16:16:11,868 - INFO - Column 41 ('MO') fully blank - colored black
+2025-12-09 16:16:19,135 - INFO - Column 42 ('Online Payment') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:27,428 - INFO - Column 43 ('Paytm') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:37,878 - INFO - Column 44 ('PayTM DQR') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:46,798 - INFO - Column 45 ('PayU Payment') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:48,658 - INFO - Column 46 ('PP') fully blank - colored black
+2025-12-09 16:16:54,824 - INFO - Column 47 ('QC Wallet') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:16:56,627 - INFO - Column 48 ('VC') fully blank - colored black
+2025-12-09 16:17:03,445 - INFO - Column 49 ('Vouchagram') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:05,300 - INFO - Column 50 ('UPI') fully blank - colored black
+2025-12-09 16:17:06,772 - INFO - Column 51 ('Credit Card - Airport Stores') fully blank - colored black
+2025-12-09 16:17:08,281 - INFO - Column 52 ('UPI - Airport Stores') fully blank - colored black
+2025-12-09 16:17:09,845 - INFO - Column 53 ('Cash - Airport Stores') fully blank - colored black
+2025-12-09 16:17:09,871 - INFO - Post-processing sheet 'Advances' rows 2-356 cols 1-29
+2025-12-09 16:17:09,981 - INFO - Column 1 ('Region') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:17:10,081 - INFO - Column 2 ('Store') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:17:10,187 - INFO - Column 3 ('Store Code') detected as numeric (date_frac=0.00, num_frac=0.99)
+2025-12-09 16:17:10,473 - INFO - Column 4 ('Order Date') detected as date (date_frac=1.00, num_frac=0.00)
+2025-12-09 16:17:10,793 - INFO - Column 5 ('Order Number') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:17:10,878 - INFO - Column 6 ('Last Bill Date') detected as date (date_frac=1.00, num_frac=0.00)
+2025-12-09 16:17:11,058 - INFO - Column 7 ('Bill Number') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:17:11,182 - INFO - Column 8 ('Customer Code') detected as numeric (date_frac=0.02, num_frac=1.00)
+2025-12-09 16:17:11,272 - INFO - Column 9 ('Customer Name') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:17:11,439 - INFO - Column 10 ('No Of Items') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:11,491 - INFO - Column 11 ('Total Quantity') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:11,534 - INFO - Column 12 ('Approximate Value') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:11,582 - INFO - Column 13 ('Advance Amount') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:11,643 - INFO - Column 14 ('Cash') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:11,692 - INFO - Column 15 ('Credit Card') detected as text (date_frac=1.00, num_frac=1.00)
+2025-12-09 16:17:11,786 - INFO - Column 16 ('Coupon') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:11,886 - INFO - Column 17 ('Credit') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:12,057 - INFO - Column 18 ('GV') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:12,315 - INFO - Column 19 ('CCN') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:12,686 - INFO - Column 20 ('Points') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:12,818 - INFO - Column 21 ('Cheque') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:12,944 - INFO - Column 22 ('Prepaid Card') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:13,092 - INFO - Column 23 ('Temp Credit') detected as numeric (date_frac=0.00, num_frac=1.00)
+2025-12-09 16:17:13,139 - INFO - Column 24 ('Cash Advance') fully blank - colored black
+2025-12-09 16:17:13,171 - INFO - Column 25 ('Credit Card Advance') fully blank - colored black
+2025-12-09 16:17:13,196 - INFO - Column 26 ('OtherPayments') fully blank - colored black
+2025-12-09 16:17:13,219 - INFO - Column 27 ('Payment Mode') fully blank - colored black
+2025-12-09 16:17:13,319 - INFO - Column 28 ('Balance Amount') detected as numeric (date_frac=0.01, num_frac=1.00)
+2025-12-09 16:17:13,448 - INFO - Column 29 ('Status') detected as text (date_frac=0.00, num_frac=0.00)
+2025-12-09 16:18:04,556 - INFO - Saved post-processed workbook: temp_uploads\031fc783-545e-4735-be80-0280f7a21979_advances_sales_combined.xlsx

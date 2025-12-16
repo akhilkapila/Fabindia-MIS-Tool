@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Last Process Log</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ cache_v }}">
+</head>
+<body>
+    <div style="max-width:1100px;margin:24px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05)">
+        <h2 style="margin-top:0;">Last Process Log</h2>
+        <p style="color:#666;margin-top:4px;">Path: <strong>{{ log_path or 'N/A' }}</strong></p>
+        <div style="margin-top:12px;">
+            <a href="/" style="margin-right:12px;">← Back to App</a>
+            {% if log_path %}
+            <a href="{{ url_for('static', filename=log_path.replace('\\','/')) }}" download>Download Log</a>
+            {% endif %}
+        </div>
+        <div style="margin-top:18px;">
+            <pre style="white-space:pre-wrap;word-break:break-word;background:#fafafa;padding:12px;border-radius:6px;border:1px solid #eee;height:60vh;overflow:auto;color:#222">{{ log_content }}</pre>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create a new account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Your account will require approval from an administrator.
+            </p>
+        </div>
+        <form class="mt-8 space-y-4" method="POST" action="">
+            {{ form.hidden_tag() }}
+            
+            <div>
+                {{ form.name.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.name(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                {% for error in form.name.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.email.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.email(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                {% for error in form.email.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+             <div class="grid grid-cols-2 gap-4">
+                <div>
+                    {{ form.age.label(class="block text-sm font-medium text-gray-700") }}
+                    {{ form.age(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                    {% for error in form.age.errors %}
+                        <span class="text-red-500 text-xs">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    {{ form.department.label(class="block text-sm font-medium text-gray-700") }}
+                    {{ form.department(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                    {% for error in form.department.errors %}
+                        <span class="text-red-500 text-xs">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div>
+                {{ form.reporting_manager.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.reporting_manager(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                {% for error in form.reporting_manager.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.password(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                {% for error in form.password.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.confirm_password.label(class="block text-sm font-medium text-gray-700") }}
+                {{ form.confirm_password(class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm") }}
+                {% for error in form.confirm_password.errors %}
+                    <span class="text-red-500 text-xs">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.submit(class="mt-2 group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer") }}
+            </div>
+        </form>
+        <div class="text-center">
+            <p class="text-sm text-gray-600">
+                Already have an account?
+                <a href="{{ url_for('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
+                    Log in here
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

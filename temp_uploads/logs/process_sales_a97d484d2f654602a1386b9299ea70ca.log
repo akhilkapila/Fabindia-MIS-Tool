@@ -1,0 +1,68 @@
+2025-12-11 16:29:37,811 - INFO - Starting process: process_sales
+2025-12-11 16:29:37,812 - INFO - Received sales process request
+2025-12-11 16:29:46,695 - INFO - Loading file: SalesReportAbstract (3).csv from sheet 'SalesReportAbstract' starting at row 6
+2025-12-11 16:30:47,626 - INFO - ✓ File loaded successfully - shape: (70205, 230)
+2025-12-11 16:30:47,628 - INFO - Loaded data - shape: (70205, 230), columns: ['RegionName', 'StoreName', 'StoreCode', 'AlternateStoreCode', 'StoreGSTNumber', 'BillDate', 'BillTime', 'BillNumber', 'CustomerCode', 'CustomerName', 'AlternateCustomerCode', 'CustomerGSTNumber', 'MobileNumber', 'Email', 'DOB', 'DOA', 'DoctorName', 'PatientName', 'Quantity', 'Discount', 'DiscountPercentage', 'BaseValue', 'TNGSTAmount', 'CST', 'OtherTax', 'SGST', 'CGST', 'IGST', 'UTGST', 'Tax', 'Cash', 'Card', 'CreditCardType', 'Coupon', 'Credit', 'InsuranceCredit', 'CashAdvance', 'CreditCardAdvance', 'AdvancedAmount', 'GiftVoucher', 'CCNUsed', 'CCNIssued', 'PointsAllocated', 'PointsRedeemed', 'Cheque', 'PrepaidCard', 'OtherPayments', 'Amount', 'RefDate', 'RefTime', 'SyncTime', 'RefSeries', 'RefNo', 'Cenvat', 'Educess', 'Sheducess', 'Rod', 'CessAmt', 'OtherDebit', 'OtherCredit', 'DeliveryType', 'UserName', 'RemarksQuantity', 'RemarksWeight', 'Email ID', 'IsJobCardBill', 'TempCredit', 'AdditionalInformation', 'OtherDiscountAmount', 'OtherDiscountPercentage', 'OutletOwnership', 'ServiceTaxAmt', 'STCessAmount', 'STEduCessAmount', 'SalesmanName', 'SalesmanCode', 'ManualBillDate', 'ManualBillNo', 'MRPTotal', 'PolicyNumber', 'Remarks', 'Nationality', 'New customer Type', 'CustomerCreatedOn', 'PrintCount', 'BillSeries', 'OrderDate', 'OrderNumber', 'DiscountName', 'IntegrationId', 'CAAddress1', 'CAAddress2', 'CAAddress3', 'CACityName', 'CAStateName', 'TerminalNumber', 'PosType', 'DiscountApprovedBy', 'TransactionAttributes', 'AdditionalCESS', 'ZoneCode', 'ZoneName', 'BNumber', 'BillStartTime', 'StateName', 'TransactionValidity', 'TransID', 'DeviceType', 'CashRefund', 'SalesType', 'RefReturnDate', 'RefReturnNumber', 'RefReturnStore', 'CESS', 'StoreClusterName', 'CityName', 'Address1', 'Address2', 'Address3', 'PinCode', 'ShipmentDate', 'TransportName', 'ShipmentMethod', 'ShipmentTrackingNumber', 'ShipmentEnteredBy', 'ShipmentEnteredOn', 'ManualBillReferenceNo', 'WSDN', 'IRN', 'FreeValue', 'InsuranceCompanyCode', 'InsuranceCompanyName', 'OrderReferenceDate', 'OrderReferenceNo', 'AcknowledgeDate', 'AcknowledgeNumber', 'CustomerGroupName', 'ChannelName', 'TCS', 'Referral', 'BillDate1', 'BillSeries1', 'StoreCode1', 'TerminalNumber1', 'BillNumber1', 'Online Payment', 'PAYTM', 'PayTM DQR', 'PayU Payment', 'Promo', 'QC Wallet', 'Vouchagram', 'DeliveryAddress1', 'DeliveryAddress2', 'DeliveryAddress3', 'DeliveryState', 'DeliveryPinCode', 'Shipping Address 1', 'Shipping Address 2', 'Shipping Address 3', 'Shipping State', 'Shipping Pincode', 'Shipping StateName', 'ReferenceDocument', 'PivotStoreCode', 'OrderDeliveryAddress1', 'OrderDeliveryAddress2', 'OrderDeliveryAddress3', 'OrderDeliveryState', 'CustomerTierName', 'CustomerTypeName', 'FamilyMemberName', 'Relation4Customer', 'FamilyMemberDOB', 'JobCardDate', 'JobCardNumber', 'JobCardStore', 'EwayBillDate', 'EwayBillNumber', 'EwayTransportDocNo', 'EwayTransportDocDate', 'EwayValidFrom', 'EwayValidTo', 'RefChannelName', 'RefChannelOrderNo', 'InvoiceNumber', 'ShipmentNumber', 'ExternalID', 'OrderProcessMethod', 'InvoiceDate', 'BudgetDiscountValue', 'StoreAbbrevation', 'OrderReference', 'AlternateCode2', 'CompanyEmployeeID', 'ROD2', 'TINNumber', 'PODCityName', 'ShipToCityName', 'GrossWithDiscount', 'AverageSellingPrice', 'TransactionDate', 'BillType', 'TaxRefundStatus', 'StoreBrand', 'StoreType', 'ReferenceDocNo', 'Country', 'IsInsuranceBill', 'TotalCoPayerAmount', 'PrescriptionNo', 'BA Address1', 'BA Address2', 'BA Address3', 'BA Pincode', 'BA City', 'BA State', 'CPincode', 'CArea', 'PODArea', 'ShipToArea', 'TaxRefundAmount', 'TaxRefundReferenceNumber', 'GSTTaxType', 'ChargeBillDate', 'ChargeBillSeries', 'ChargeStoreCode', 'ChargeTerminalNumber', 'ChargeBillNumber', 'No.of Boxes']
+2025-12-11 16:30:47,649 - INFO - ✓ Columns converted to uppercase: ['REGIONNAME', 'STORENAME', 'STORECODE', 'ALTERNATESTORECODE', 'STOREGSTNUMBER', 'BILLDATE', 'BILLTIME', 'BILLNUMBER', 'CUSTOMERCODE', 'CUSTOMERNAME']...
+2025-12-11 16:30:47,649 - INFO - ✓ Mappings loaded successfully
+2025-12-11 16:30:47,668 - INFO - ✓ Rename map created with 40 mappings
+2025-12-11 16:30:47,907 - INFO - ✓ After rename: shape=(70205, 230)
+2025-12-11 16:30:48,058 - INFO - ✓ After reindex: shape=(70205, 53), has 53 columns
+2025-12-11 16:30:48,437 - INFO - ✓ Force-copied source 'ALTERNATESTORECODE' from input file to 'AlternateStoreCode' and 'StoreCode'
+2025-12-11 16:30:50,128 - DEBUG - Removed 'BP' prefix from StoreCode
+2025-12-11 16:30:51,770 - DEBUG - Removed 'BP' prefix from AlternateStoreCode
+2025-12-11 16:30:52,205 - INFO - Removed 0 rows with prefixes ('97', '98')
+2025-12-11 16:30:52,299 - INFO - ✓ BillDate parsed with DD-MM-YYYY format
+2025-12-11 16:30:52,640 - INFO - Saving sales dataframe to Excel: shape=(70205, 53)
+2025-12-11 16:36:11,986 - INFO - Saved processed sales to temp_uploads\0f82b54a-44c9-4e4a-a3ac-6742a28350de_sales.xlsx
+2025-12-11 16:36:11,991 - INFO - Output dataframe shape: (70205, 53), rows: 70205
+2025-12-11 16:36:11,991 - INFO - File size after save: 14119002 bytes
+2025-12-11 16:36:11,991 - INFO - Starting post-processing...
+2025-12-11 16:39:12,276 - INFO - Post-processing 'Sheet1': rows 2-70206, cols 1-53
+2025-12-11 16:39:12,382 - DEBUG - Column 1 ('AlternateStoreCode'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:14,350 - DEBUG - Column 2 ('RegionName'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 16:39:14,832 - DEBUG - Column 3 ('StoreName'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 16:39:15,306 - DEBUG - Column 4 ('StoreCode'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:17,525 - DEBUG - Column 5 ('BillDate'): date (date_frac=1.00, num_frac=0.00)
+2025-12-11 16:39:30,899 - DEBUG - Column 6 ('Quantity'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:33,346 - DEBUG - Column 7 ('Discount'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:35,528 - DEBUG - Column 8 ('DiscountPercentage'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:39,499 - DEBUG - Column 9 ('BaseValue'): numeric (date_frac=0.04, num_frac=1.00)
+2025-12-11 16:39:45,840 - DEBUG - Column 10 ('SGST'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:48,685 - DEBUG - Column 11 ('CGST'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:53,864 - DEBUG - Column 12 ('IGST'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:39:58,869 - DEBUG - Column 13 ('UTGST'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:02,527 - DEBUG - Column 14 ('Tax'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:05,889 - DEBUG - Column 15 ('Cash'): numeric (date_frac=0.01, num_frac=1.00)
+2025-12-11 16:40:08,247 - DEBUG - Column 16 ('Card'): numeric (date_frac=0.01, num_frac=1.00)
+2025-12-11 16:40:11,240 - DEBUG - Column 17 ('CreditCardType'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 16:40:11,788 - DEBUG - Column 18 ('Coupon'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:15,240 - DEBUG - Column 19 ('Credit'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:18,822 - DEBUG - Column 20 ('InsuranceCredit'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:21,051 - DEBUG - Column 21 ('CashAdvance'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:23,179 - DEBUG - Column 22 ('CreditCardAdvance'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:25,616 - DEBUG - Column 23 ('AdvancedAmount'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:27,918 - DEBUG - Column 24 ('GiftVoucher'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:31,014 - DEBUG - Column 25 ('CCNUsed'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:33,467 - DEBUG - Column 26 ('CCNIssued'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:36,050 - DEBUG - Column 27 ('PointsAllocated'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:39,091 - DEBUG - Column 28 ('PointsRedeemed'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:52,012 - DEBUG - Column 29 ('Cheque'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:57,078 - DEBUG - Column 30 ('PrepaidCard'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:40:59,189 - DEBUG - Column 31 ('OtherPayments'): numeric (date_frac=0.02, num_frac=1.00)
+2025-12-11 16:41:01,542 - DEBUG - Column 32 ('Amount'): numeric (date_frac=0.04, num_frac=1.00)
+2025-12-11 16:41:03,861 - DEBUG - Column 33 ('MRPTOTAL'): numeric (date_frac=0.04, num_frac=1.00)
+2025-12-11 16:41:05,892 - DEBUG - Column 34 ('PinCode'): numeric (date_frac=0.21, num_frac=1.00)
+2025-12-11 16:41:08,126 - DEBUG - Column 35 ('WSDN'): text (date_frac=0.00, num_frac=0.00)
+2025-12-11 16:41:08,636 - DEBUG - Column 42 ('Online Payment'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:41:12,707 - DEBUG - Column 43 ('Paytm'): numeric (date_frac=0.02, num_frac=1.00)
+2025-12-11 16:41:16,868 - DEBUG - Column 44 ('PayTM DQR'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:41:20,630 - DEBUG - Column 45 ('PayU Payment'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:41:23,458 - DEBUG - Column 47 ('QC Wallet'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:41:32,344 - DEBUG - Column 49 ('Vouchagram'): numeric (date_frac=0.00, num_frac=1.00)
+2025-12-11 16:44:00,862 - INFO - ✓ Post-processing complete: temp_uploads\0f82b54a-44c9-4e4a-a3ac-6742a28350de_sales.xlsx
+2025-12-11 16:44:00,869 - INFO - Post-processing completed successfully
+2025-12-11 16:44:00,871 - INFO - File size after post-processing: 11042091 bytes
+2025-12-11 16:44:00,871 - INFO - Reading file from disk to send to client: temp_uploads\0f82b54a-44c9-4e4a-a3ac-6742a28350de_sales.xlsx
+2025-12-11 16:44:00,879 - INFO - Successfully read file from disk: 11042091 bytes
+2025-12-11 16:44:00,879 - INFO - Sending file to user
