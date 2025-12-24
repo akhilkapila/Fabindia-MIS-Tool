@@ -263,4 +263,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- INIT ---
     setActiveTabOnLoad();
 
-});
+});function deletePrompt(id) { if (!confirm('Are you sure?')) return; fetch('/api/prompts/' + id, {method: 'DELETE'}).then(r=>r.json()).then(d=>{ if(d.message==='Deleted') window.location.reload(); else alert('Error: ' + JSON.stringify(d)); }); }

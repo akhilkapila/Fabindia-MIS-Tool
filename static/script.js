@@ -1,4 +1,26 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+
+    // --- LENIS SMOOTH SCROLL INITIALIZATION ---
+    if (typeof Lenis !== 'undefined') {
+        const lenis = new Lenis({
+            duration: 0.8,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+        console.log("Lenis Smooth Scroll Initialized");
+    }
 
     // --- LOAD & DISPLAY PROCESS LOG SUMMARIES ---
     function loadProcessLogSummary() {
@@ -53,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProcessLogSummary();
 
     // --- TAB SWITCHING LOGIC ---
-    window.openTab = function(evt, tabName) {
+    window.openTab = function (evt, tabName) {
         let tabContents = document.getElementsByClassName("tab-content");
         for (let i = 0; i < tabContents.length; i++) {
             tabContents[i].style.display = "none";
@@ -65,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         document.getElementById(tabName).style.display = "block";
-        
+
         for (let i = 0; i < tabButtons.length; i++) {
             if (tabButtons[i].innerHTML.includes(tabName)) {
                 tabButtons[i].className += " active";
@@ -73,11 +95,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         localStorage.setItem('mainAppActiveTab', tabName);
     }
-    
+
     function setActiveTabOnLoad() {
         const storedTab = localStorage.getItem('mainAppActiveTab');
-        const tabToLoad = storedTab || 'Sales'; 
-        
+        const tabToLoad = storedTab || 'Sales';
+
         let foundButton = false;
         let tabButtons = document.getElementsByClassName("tab-button");
         for (let i = 0; i < tabButtons.length; i++) {
@@ -103,13 +125,13 @@ document.addEventListener('DOMContentLoaded', function() {
             progressOverlay.style.display = 'flex';
             progressBar.style.width = '0%';
             progressText.innerText = 'Starting... 0%';
-            
+
             let width = 0;
             progressInterval = setInterval(() => {
                 if (width >= 90) {
                     clearInterval(progressInterval);
                 } else {
-                    const increment = Math.max(1, (90 - width) / 10); 
+                    const increment = Math.max(1, (90 - width) / 10);
                     width += increment;
                     progressBar.style.width = width + '%';
                     progressText.innerText = 'Processing... ' + Math.round(width) + '%';
@@ -126,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 progressOverlay.style.display = 'none';
                 progressBar.style.width = '0%';
-            }, 1000); 
+            }, 1000);
         }
     }
 
@@ -143,23 +165,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadsContainer = document.getElementById("bank-uploads-container");
 
     if (addBankBtn) {
-        addBankBtn.addEventListener("click", function() {
-            const selectedBankName = bankDropdown.options[bankDropdown.selectedIndex].text;
-            const selectedBankValue = bankDropdown.value;
+        // Refactored function to add a bank row
+        function addBankRow(selectedBankName, selectedBankValue) {
+            if (!selectedBankValue) return;
 
-            if (!selectedBankValue) {
-                alert("Please select a bank from the dropdown first.");
-                return;
-            }
             if (document.getElementById("bank-box-" + selectedBankValue)) {
-                alert(selectedBankName + " has already been added.");
+                // Already added
                 return;
             }
 
             const newBankBox = document.createElement("div");
             newBankBox.className = "bank-upload-box";
-            newBankBox.id = "bank-box-" + selectedBankValue; 
-            
+            newBankBox.id = "bank-box-" + selectedBankValue;
+
             newBankBox.innerHTML = `
                 <button class="remove-bank-btn" title="Remove">&times;</button>
                 <h3>🏦 ${selectedBankName}</h3>
@@ -189,18 +207,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
-            newBankBox.querySelector(".remove-bank-btn").addEventListener("click", function() {
+            newBankBox.querySelector(".remove-bank-btn").addEventListener("click", function () {
                 uploadsContainer.removeChild(newBankBox);
             });
+        }
+
+        // Single Add
+        addBankBtn.addEventListener("click", function () {
+            const selectedBankName = bankDropdown.options[bankDropdown.selectedIndex].text;
+            const selectedBankValue = bankDropdown.value;
+            if (!selectedBankValue) {
+                alert("Please select a bank from the dropdown first.");
+                return;
+            }
+            if (document.getElementById("bank-box-" + selectedBankValue)) {
+                alert(selectedBankName + " has already been added.");
+                return;
+            }
+            addBankRow(selectedBankName, selectedBankValue);
             bankDropdown.selectedIndex = 0;
         });
+
+        // Add All Banks
+        const addAllBanksBtn = document.getElementById("add-all-banks-btn");
+        if (addAllBanksBtn) {
+            addAllBanksBtn.addEventListener("click", function () {
+                // Iterate through all options starting from index 1 (skipping placeholder)
+                for (let i = 1; i < bankDropdown.options.length; i++) {
+                    const opt = bankDropdown.options[i];
+                    addBankRow(opt.text, opt.value);
+                }
+            });
+        }
     }
 
     // --- SALES PROCESSING (TAB 1) ---
     const salesButton = document.getElementById('btn-process-sales');
     const salesFile = document.getElementById('file-sales');
     if (salesButton) {
-        salesButton.addEventListener('click', function() {
+        salesButton.addEventListener('click', function () {
             const file = salesFile.files[0];
             if (!file) {
                 alert('Please select a Sales file to process.');
@@ -208,32 +253,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const formData = new FormData();
             formData.append('sales_file', file);
-            
-            startProgress(); 
+
+            startProgress();
 
             fetch('/process-sales', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress(); 
-                loadProcessLogSummary(); // Reload log summaries
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Processed_Sales.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                loadProcessLogSummary(); // Reload log summaries to show error
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    loadProcessLogSummary(); // Reload log summaries
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Processed_Sales.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    loadProcessLogSummary(); // Reload log summaries to show error
+                    alert('Error: ' + error.message);
+                });
         });
     }
 
@@ -241,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const advancesButton = document.getElementById('btn-process-advances');
     const advancesFile = document.getElementById('file-advances');
     if (advancesButton) {
-        advancesButton.addEventListener('click', function() {
+        advancesButton.addEventListener('click', function () {
             const file = advancesFile.files[0];
             if (!file) {
                 alert('Please select an Advances file to process.');
@@ -249,39 +294,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const formData = new FormData();
             formData.append('advances_file', file);
-            
-            startProgress(); 
+
+            startProgress();
 
             fetch('/process-advances', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress(); 
-                loadProcessLogSummary(); // Reload log summaries
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Processed_Advances_Consolidated.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                loadProcessLogSummary(); // Reload log summaries to show error
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    loadProcessLogSummary(); // Reload log summaries
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Processed_Advances_Consolidated.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    loadProcessLogSummary(); // Reload log summaries to show error
+                    alert('Error: ' + error.message);
+                });
         });
     }
 
     // --- BANKING PROCESSING (TAB 3) ---
     const bankingButton = document.getElementById('btn-process-banking');
     if (bankingButton) {
-        bankingButton.addEventListener('click', function() {
+        bankingButton.addEventListener('click', function () {
             const formData = new FormData();
             const bankBoxes = document.querySelectorAll('.bank-upload-box');
 
@@ -294,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let errorMessage = "";
 
             for (const box of bankBoxes) {
-                const bankTitle = box.querySelector('h3').innerText; 
+                const bankTitle = box.querySelector('h3').innerText;
                 const fileInput = box.querySelector(`input[name^="file_"]`);
                 const dateInputs = box.querySelectorAll('.date-input-flatpickr');
                 const fromInput = dateInputs[0];
@@ -328,41 +373,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            startProgress(); 
+            startProgress();
 
             fetch('/process-banking', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress(); 
-                loadProcessLogSummary(); // Reload log summaries
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Processed_Collection.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                loadProcessLogSummary(); // Reload log summaries to show error
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    loadProcessLogSummary(); // Reload log summaries
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Processed_Collection.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    loadProcessLogSummary(); // Reload log summaries to show error
+                    alert('Error: ' + error.message);
+                });
         });
     }
-    
+
     // --- NEW: FINAL PROCESS (TAB 4) - INDIVIDUAL FILE PROCESSING ---
     const individualButton = document.getElementById('btn-process-individual');
     const combineFile = document.getElementById('file-combine-mis');
     const finalMisFile = document.getElementById('file-final-mis');
-    
+
     if (individualButton) {
-        individualButton.addEventListener('click', function() {
+        individualButton.addEventListener('click', function () {
             if (combineFile.files.length === 0) {
                 alert('Please select a Combine MIS file.');
                 return;
@@ -371,45 +416,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Please select the Final MIS file.');
                 return;
             }
-            
+
             // Process ONLY the first selected file
             const formData = new FormData();
             formData.append('combine_mis', combineFile.files[0]); // Only first file
             formData.append('final_mis', finalMisFile.files[0]);
 
             startProgress();
-            
+
             fetch('/process-individual-combine', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                const fileName = combineFile.files[0].name.split('.')[0];
-                a.download = `Updated_Final_MIS_${fileName}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                alert('Individual file processed successfully!');
-            })
-            .catch(error => {
-                stopProgressError();
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    const fileName = combineFile.files[0].name.split('.')[0];
+                    a.download = `Updated_Final_MIS_${fileName}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    alert('Individual file processed successfully!');
+                })
+                .catch(error => {
+                    stopProgressError();
+                    alert('Error: ' + error.message);
+                });
         });
     }
-    
+
     // --- FINAL PROCESS (TAB 4) - COMBINED FILE PROCESSING ---
     const finalButton = document.getElementById('btn-process-final');
-    
+
     if (finalButton) {
-        finalButton.addEventListener('click', function() {
+        finalButton.addEventListener('click', function () {
             if (combineFile.files.length === 0) {
                 alert('Please select one or more Combine MIS file(s).');
                 return;
@@ -420,41 +465,41 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const formData = new FormData();
-            
+
             // Append multiple Combine MIS files
             for (let i = 0; i < combineFile.files.length; i++) {
                 formData.append('combine_mis', combineFile.files[i]);
             }
-            
+
             // Append single Final MIS file
             formData.append('final_mis', finalMisFile.files[0]);
 
             startProgress();
-            
+
             fetch('/process-final-step', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Final_Consolidated_Report.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Final_Consolidated_Report.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    alert('Error: ' + error.message);
+                });
         });
     }
-    
+
     // --- NEW HANDLERS FOR THREE-STEP WORKFLOW (STEP A, B, C) ---
     const combineOnlyButton = document.getElementById('btn-process-combine-only');
     const combineOnlyInput = document.getElementById('file-combine-mis-process');
@@ -470,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
         box.innerHTML = html;
     }
     if (combineOnlyButton) {
-        combineOnlyButton.addEventListener('click', function() {
+        combineOnlyButton.addEventListener('click', function () {
             if (!combineOnlyInput || combineOnlyInput.files.length === 0) {
                 alert('Please select one or more Combine MIS file(s) to process.');
                 return;
@@ -483,34 +528,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             startProgress();
             fetch('/process-combine-only', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress();
-                loadProcessLogSummary(); // Reload log summaries
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Processed_Combine_MIS.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                loadProcessLogSummary(); // Reload log summaries to show error
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    loadProcessLogSummary(); // Reload log summaries
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Processed_Combine_MIS.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    loadProcessLogSummary(); // Reload log summaries to show error
+                    alert('Error: ' + error.message);
+                });
         });
     }
 
     // Inspect Combine MIS on file select
     if (combineOnlyInput) {
-        combineOnlyInput.addEventListener('change', function() {
+        combineOnlyInput.addEventListener('change', function () {
             if (combineOnlyInput.files.length === 0) {
                 showInspectionBox(combineOnlyInput, 'inspect-combine-box', 'No file selected.');
                 return;
@@ -519,39 +564,39 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('combine_mis', file);
             fetch('/inspect-combine-mis', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    showInspectionBox(combineOnlyInput, 'inspect-combine-box', `<b>Error:</b> ${data.error}`);
-                    return;
-                }
-                const sheets = data.sheets || [];
-                const cols = data.sheet_columns || {};
-                const preferred = 'MIS Working';
-                let html = `<b>Detected sheets:</b> ${sheets.join(', ')}<br>`;
-                if (!data.preferred_present) {
-                    html += `<div style="color:darkorange"><b>Warning:</b> Expected sheet '<i>${preferred}</i>' not found. Processing will try the first sheet.</div>`;
-                } else {
-                    html += `<div style="color:green">Found expected sheet '<i>${preferred}</i>'.</div>`;
-                }
-                // show columns for preferred or first sheet
-                const showSheet = data.preferred_present ? preferred : sheets[0];
-                if (showSheet && cols[showSheet]) {
-                    html += `<b>Columns in '${showSheet}':</b> ${cols[showSheet].join(', ')}<br>`;
-                }
-                html += `<small>Processing will not change column names in your files.</small>`;
-                showInspectionBox(combineOnlyInput, 'inspect-combine-box', html);
-            })
-            .catch(err => {
-                showInspectionBox(combineOnlyInput, 'inspect-combine-box', `<b>Error:</b> ${err.message}`);
-            });
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        showInspectionBox(combineOnlyInput, 'inspect-combine-box', `<b>Error:</b> ${data.error}`);
+                        return;
+                    }
+                    const sheets = data.sheets || [];
+                    const cols = data.sheet_columns || {};
+                    const preferred = 'MIS Working';
+                    let html = `<b>Detected sheets:</b> ${sheets.join(', ')}<br>`;
+                    if (!data.preferred_present) {
+                        html += `<div style="color:darkorange"><b>Warning:</b> Expected sheet '<i>${preferred}</i>' not found. Processing will try the first sheet.</div>`;
+                    } else {
+                        html += `<div style="color:green">Found expected sheet '<i>${preferred}</i>'.</div>`;
+                    }
+                    // show columns for preferred or first sheet
+                    const showSheet = data.preferred_present ? preferred : sheets[0];
+                    if (showSheet && cols[showSheet]) {
+                        html += `<b>Columns in '${showSheet}':</b> ${cols[showSheet].join(', ')}<br>`;
+                    }
+                    html += `<small>Processing will not change column names in your files.</small>`;
+                    showInspectionBox(combineOnlyInput, 'inspect-combine-box', html);
+                })
+                .catch(err => {
+                    showInspectionBox(combineOnlyInput, 'inspect-combine-box', `<b>Error:</b> ${err.message}`);
+                });
         });
     }
 
     const finalOnlyButton = document.getElementById('btn-process-final-only');
     const finalOnlyInput = document.getElementById('file-final-mis-process');
     if (finalOnlyButton) {
-        finalOnlyButton.addEventListener('click', function() {
+        finalOnlyButton.addEventListener('click', function () {
             if (!finalOnlyInput || finalOnlyInput.files.length === 0) {
                 alert('Please select the Final MIS file to process.');
                 return;
@@ -562,34 +607,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
             startProgress();
             fetch('/process-final-only', { method: 'POST', body: formData })
-            .then(response => {
-                if (response.ok) { return response.blob(); }
-                return response.json().then(errorData => { throw new Error(errorData.error); });
-            })
-            .then(blob => {
-                finishProgress();
-                loadProcessLogSummary(); // Reload log summaries
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'Processed_Final_MIS.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            })
-            .catch(error => {
-                stopProgressError();
-                loadProcessLogSummary(); // Reload log summaries to show error
-                alert('Error: ' + error.message);
-            });
+                .then(response => {
+                    if (response.ok) { return response.blob(); }
+                    return response.json().then(errorData => { throw new Error(errorData.error); });
+                })
+                .then(blob => {
+                    finishProgress();
+                    loadProcessLogSummary(); // Reload log summaries
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Processed_Final_MIS.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    stopProgressError();
+                    loadProcessLogSummary(); // Reload log summaries to show error
+                    alert('Error: ' + error.message);
+                });
         });
     }
 
     // Inspect Final MIS on file select
     if (finalOnlyInput) {
-        finalOnlyInput.addEventListener('change', function() {
+        finalOnlyInput.addEventListener('change', function () {
             if (finalOnlyInput.files.length === 0) {
                 showInspectionBox(finalOnlyInput, 'inspect-final-box', 'No file selected.');
                 return;
@@ -598,75 +643,77 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('final_mis', file);
             fetch('/inspect-final-mis', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) {
-                    showInspectionBox(finalOnlyInput, 'inspect-final-box', `<b>Error:</b> ${data.error}`);
-                    return;
-                }
-                const sheets = data.sheets || [];
-                const cols = data.sheet_columns || {};
-                const preferred = 'Reconciliation by Date by Store';
-                let html = `<b>Detected sheets:</b> ${sheets.join(', ')}<br>`;
-                if (!data.preferred_present) {
-                    html += `<div style="color:darkorange"><b>Warning:</b> Expected sheet '<i>${preferred}</i>' not found. Processing will try the first sheet.</div>`;
-                } else {
-                    html += `<div style="color:green">Found expected sheet '<i>${preferred}</i>'.</div>`;
-                }
-                const showSheet = data.preferred_present ? preferred : sheets[0];
-                if (showSheet && cols[showSheet]) {
-                    html += `<b>Columns in '${showSheet}':</b> ${cols[showSheet].join(', ')}<br>`;
-                }
-                html += `<div style="color:crimson"><b>Note:</b> The application will not modify column names in '<i>${preferred}</i>'. Only the specific update columns will be written.</div>`;
-                showInspectionBox(finalOnlyInput, 'inspect-final-box', html);
-            })
-            .catch(err => {
-                showInspectionBox(finalOnlyInput, 'inspect-final-box', `<b>Error:</b> ${err.message}`);
-            });
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        showInspectionBox(finalOnlyInput, 'inspect-final-box', `<b>Error:</b> ${data.error}`);
+                        return;
+                    }
+                    const sheets = data.sheets || [];
+                    const cols = data.sheet_columns || {};
+                    const preferred = 'Reconciliation by Date by Store';
+                    let html = `<b>Detected sheets:</b> ${sheets.join(', ')}<br>`;
+                    if (!data.preferred_present) {
+                        html += `<div style="color:darkorange"><b>Warning:</b> Expected sheet '<i>${preferred}</i>' not found. Processing will try the first sheet.</div>`;
+                    } else {
+                        html += `<div style="color:green">Found expected sheet '<i>${preferred}</i>'.</div>`;
+                    }
+                    const showSheet = data.preferred_present ? preferred : sheets[0];
+                    if (showSheet && cols[showSheet]) {
+                        html += `<b>Columns in '${showSheet}':</b> ${cols[showSheet].join(', ')}<br>`;
+                    }
+                    html += `<div style="color:crimson"><b>Note:</b> The application will not modify column names in '<i>${preferred}</i>'. Only the specific update columns will be written.</div>`;
+                    showInspectionBox(finalOnlyInput, 'inspect-final-box', html);
+                })
+                .catch(err => {
+                    showInspectionBox(finalOnlyInput, 'inspect-final-box', `<b>Error:</b> ${err.message}`);
+                });
         });
     }
 
     // Step C (merge) has been removed per workflow change
-    
+
     // --- INITIALIZE THE PAGE ---
     setActiveTabOnLoad();
 
     // --- FETCH LAST PROCESS LOG SUMMARY AND SHOW PER-TAB NOTICES ---
     function fetchAndRenderLogSummary() {
         fetch('/api/last-log-summary')
-        .then(r => r.json())
-        .then(data => {
-            if (!data || !data.found) return;
-            const summary = data.summary || {};
-            const errorCount = summary.error_count || 0;
-            const warnCount = summary.warning_count || 0;
+            .then(r => r.json())
+            .then(data => {
+                if (!data || !data.found) return;
+                const summary = data.summary || {};
+                const errorCount = summary.error_count || 0;
+                const warnCount = summary.warning_count || 0;
 
-            function makeHtml(prefix) {
-                let html = '';
-                if (errorCount > 0) {
-                    html += `<div style="background:#ffe6e6;border-left:4px solid #dc3545;padding:10px;border-radius:6px;margin-bottom:8px;color:#6b0000;"><b>${prefix}:</b> ${errorCount} error(s) found. <a href='/processing-log' target='_blank'>View details</a></div>`;
-                } else if (warnCount > 0) {
-                    html += `<div style="background:#fff8e1;border-left:4px solid #ff9800;padding:10px;border-radius:6px;margin-bottom:8px;color:#664d03;"><b>${prefix}:</b> ${warnCount} warning(s) found. <a href='/processing-log' target='_blank'>View details</a></div>`;
-                } else {
-                    html += `<div style="background:#edf7ed;border-left:4px solid #28a745;padding:10px;border-radius:6px;margin-bottom:8px;color:#1b5e20;"><b>${prefix}:</b> No recent errors. <a href='/processing-log' target='_blank'>View log</a></div>`;
+                function makeHtml(prefix) {
+                    let html = '';
+                    if (errorCount > 0) {
+                        html += `<div style="background:#ffe6e6;border-left:4px solid #dc3545;padding:10px;border-radius:6px;margin-bottom:8px;color:#6b0000;"><b>${prefix}:</b> ${errorCount} error(s) found. <a href='/processing-log' target='_blank'>View details</a></div>`;
+                    } else if (warnCount > 0) {
+                        html += `<div style="background:#fff8e1;border-left:4px solid #ff9800;padding:10px;border-radius:6px;margin-bottom:8px;color:#664d03;"><b>${prefix}:</b> ${warnCount} warning(s) found. <a href='/processing-log' target='_blank'>View details</a></div>`;
+                    } else {
+                        html += `<div style="background:#edf7ed;border-left:4px solid #28a745;padding:10px;border-radius:6px;margin-bottom:8px;color:#1b5e20;"><b>${prefix}:</b> No recent errors. <a href='/processing-log' target='_blank'>View log</a></div>`;
+                    }
+                    return html;
                 }
-                return html;
-            }
 
-            const salesBox = document.getElementById('log-summary-sales');
-            const advBox = document.getElementById('log-summary-advances');
-            const bankBox = document.getElementById('log-summary-banking');
-            const finalBox = document.getElementById('log-summary-final');
+                const salesBox = document.getElementById('log-summary-sales');
+                const advBox = document.getElementById('log-summary-advances');
+                const bankBox = document.getElementById('log-summary-banking');
+                const finalBox = document.getElementById('log-summary-final');
 
-            if (salesBox) { salesBox.innerHTML = makeHtml('Sales'); salesBox.style.display = 'block'; }
-            if (advBox) { advBox.innerHTML = makeHtml('Advances'); advBox.style.display = 'block'; }
-            if (bankBox) { bankBox.innerHTML = makeHtml('Banking'); bankBox.style.display = 'block'; }
-            if (finalBox) { finalBox.innerHTML = makeHtml('Final Process'); finalBox.style.display = 'block'; }
-        })
-        .catch(err => { /* silently fail; log not critical */ });
+                if (salesBox) { salesBox.innerHTML = makeHtml('Sales'); salesBox.style.display = 'block'; }
+                if (advBox) { advBox.innerHTML = makeHtml('Advances'); advBox.style.display = 'block'; }
+                if (bankBox) { bankBox.innerHTML = makeHtml('Banking'); bankBox.style.display = 'block'; }
+                if (finalBox) { finalBox.innerHTML = makeHtml('Final Process'); finalBox.style.display = 'block'; }
+            })
+            .catch(err => { /* silently fail; log not critical */ });
     }
 
     // Fetch right away to populate the UI
     fetchAndRenderLogSummary();
+
+
 
 });

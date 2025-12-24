@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,217 +8,482 @@
     <!-- Cache-busting for CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ cache_v }}">
 </head>
-<body>
 
-    <div class="app-container">
-        <!-- Header -->
-        <div class="app-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Finance Automation Hub</h1>
-            <div class="user-menu" style="font-size: 0.9rem;">
-                <span style="margin-right: 15px; color: #555;">Welcome, {{ current_user.name }}!</span>
-                <a href="{{ url_for('last_process_log') }}" target="_blank" style="color: #28a745; text-decoration: none; font-weight: 600; margin-right: 15px;">📋 View Last Log</a>
-                {% if admin_portal %}
-                <a href="{{ url_for('admin_portal') }}" style="color: #007bff; text-decoration: none; font-weight: 600; margin-right: 15px;">Admin Portal</a>
-                {% endif %}
-                <a href="{{ url_for('logout') }}" style="color: #dc3545; text-decoration: none;">Logout</a>
+<body class="with-sidebar">
+
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-title">Finance Tool</div>
+
+            <!-- Sidebar Navigation or Info could go here -->
+            <div style="padding: 20px; color: #94a3b8; font-size: 0.9rem;">
+                Select a tab to begin processing or use the Dashboard to search.
             </div>
         </div>
 
-        <!-- Tab Buttons -->
-        <div class="tab-container">
-            <button class="tab-button" onclick="openTab(event, 'Sales')">1. Sales</button>
-            <button class="tab-button" onclick="openTab(event, 'Advances')">2. Advances</button>
-            <button class="tab-button" onclick="openTab(event, 'Banking')">3. Banking/Collection</button>
-            <button class="tab-button" onclick="openTab(event, 'FinalProcess')">4. Final Process</button>
+        <!-- Main Content Area -->
+        <div class="content-area">
+            <div class="app-container" style="margin: 0 auto; max-width: 1000px;">
+                <!-- Header -->
+                <div class="app-header"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1 style="margin: 0;">Finance Automation Hub</h1>
+                    <div class="user-menu" style="font-size: 0.9rem;">
+                        <span style="margin-right: 15px; color: #555;">Welcome, {{ current_user.name }}!</span>
+                        <a href="{{ url_for('last_process_log') }}" target="_blank"
+                            style="color: #28a745; text-decoration: none; font-weight: 600; margin-right: 15px;">📋 View
+                            Last Log</a>
+                        {% if admin_portal %}
+                        <a href="{{ url_for('admin_portal') }}"
+                            style="color: #007bff; text-decoration: none; font-weight: 600; margin-right: 15px;">Admin
+                            Portal</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" style="color: #dc3545; text-decoration: none;">Logout</a>
+                    </div>
+                </div>
+
+                <!-- Tab Buttons -->
+                <div class="tab-container">
+                    <button class="tab-button" onclick="openTab(event, 'Dashboard')">Dashboard</button>
+                    <button class="tab-button" onclick="openTab(event, 'Sales')">Sales</button>
+                    <button class="tab-button" onclick="openTab(event, 'Advances')">Advances</button>
+                    <button class="tab-button" onclick="openTab(event, 'Banking')">Banking/Collection</button>
+                    <button class="tab-button" onclick="openTab(event, 'FinalProcess')">Final Process</button>
+                    <button class="tab-button" onclick="openTab(event, 'SplitFile')">Split File</button>
+                </div>
+
+                <!-- Tab 0: Dashboard Content -->
+                <div id="Dashboard" class="tab-content">
+                    <h2>Search Dashboard</h2>
+                    <div
+                        style="background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+
+                        <!-- Search Form -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="display:block; font-weight:600; margin-bottom:5px;">Search Query</label>
+                            <input type="text" id="dash-search-query" placeholder="Enter keywords to search..."
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
+                        </div>
+
+                        <div style="display: flex; gap: 30px; margin-bottom: 25px; flex-wrap: wrap;">
+                            <!-- Dynamic Categories -->
+                            <div style="flex: 1; min-width: 200px;">
+                                <label
+                                    style="display:block; font-weight:600; margin-bottom:8px; color:#64748b;">Categories
+                                    (Sheets)</label>
+                                <div style="display:flex; flex-direction: column; gap: 8px;">
+                                    {% if search_categories %}
+                                    {% for cat in search_categories %}
+                                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" class="dash-cat-cb" value="{{ cat.category_name }}"> {{
+                                        cat.category_name }}
+                                    </label>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p style="color: #999; font-size: 0.9em;">No categories configured.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Payment Modes -->
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="display:block; font-weight:600; margin-bottom:8px; color:#64748b;">Payment
+                                    Modes (Columns)</label>
+                                <div style="display:flex; flex-direction: column; gap: 8px;">
+                                    {% if search_modes %}
+                                    {% for mode in search_modes %}
+                                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" class="dash-mode-cb" value="{{ mode.mode_name }}"> {{
+                                        mode.mode_name }}
+                                    </label>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p style="color: #999; font-size: 0.9em;">No modes configured.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="performDashboardSearch()"
+                            style="background-color: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; width: 100%;">
+                            🔍 Search Master File
+                        </button>
+                    </div>
+
+                    <!-- Results Area -->
+                    <div id="dash-results-area" style="display: none;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0; color: #334155;">Search Results</h3>
+                            <button onclick="exportDashboardSearch()"
+                                style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Download
+                                Excel</button>
+                        </div>
+                        <div style="overflow-x: auto; bg-white rounded shadow-sm border border-gray-200">
+                            <table id="dash-results-table"
+                                style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                                <thead>
+                                    <tr style="background: #f1f5f9; text-align: left;">
+                                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Sheet</th>
+                                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Row</th>
+                                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Match In</th>
+                                        <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Data Snippet</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-results-tbody">
+                                    <!-- populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <p id="dash-no-results"
+                            style="display:none; text-align: center; color: #666; margin-top: 20px;">No results found.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tab 1: Sales Content -->
+                <div id="Sales" class="tab-content">
+                    <h2>Sales Data Processing</h2>
+                    <div class="log-summary-box" id="log-summary-sales" style="margin-bottom:12px; display:none;">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <!-- SECTION: PROCESS SALES FILE -->
+                    <div
+                        style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0f7ff;">
+                        <h3 style="color: #007bff; margin-top: 0;">Step 1: Process Sales File</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Load and process your Sales data file with automatic formatting
+                            applied.
+                        </p>
+
+                        <div class="file-upload-group" style="margin-bottom: 15px;">
+                            <label for="file-sales"
+                                style="display: block; font-weight: 600; margin-bottom: 5px; color: #007bff;">
+                                Select Sales File
+                            </label>
+                            <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+                                Supports: .xls, .xlsx, .xlsm, .csv - Single file required
+                            </p>
+                            <input type="file" id="file-sales" class="file-input" accept=".xls,.xlsx,.xlsm,.csv">
+                        </div>
+
+                        <div class="button-group"
+                            style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
+                            <button id="btn-process-sales" class="btn-process"
+                                style="background-color: #007bff; border-color: #0056b3; flex: 1;">
+                                Process & Download Sales
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            ✓ Dates formatted as DD-MM-YYYY | ✓ Data validated and cleaned | ✓ Log generated
+                        </small>
+                    </div>
+
+                    <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
+                        <div></div>
+                        <button class="btn-nav btn-next" onclick="openTab(event, 'Advances')">Next Tab →</button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Advances Content -->
+                <div id="Advances" class="tab-content">
+                    <h2>Advances Data Processing</h2>
+                    <div class="log-summary-box" id="log-summary-advances" style="margin-bottom:12px; display:none;">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <!-- SECTION: PROCESS ADVANCES FILE -->
+                    <div
+                        style="border: 2px solid #fd7e14; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #fff8f0;">
+                        <h3 style="color: #fd7e14; margin-top: 0;">Step 1: Process Advances File</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Load and process your Advances data with automatic consolidation
+                            and formatting.
+                        </p>
+
+                        <div class="file-upload-group" style="margin-bottom: 15px;">
+                            <label for="file-advances"
+                                style="display: block; font-weight: 600; margin-bottom: 5px; color: #fd7e14;">
+                                Select Advances File
+                            </label>
+                            <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+                                Supports: .xls, .xlsx, .xlsm, .csv - Single file required
+                            </p>
+                            <input type="file" id="file-advances" class="file-input" accept=".xls,.xlsx,.xlsm,.csv">
+                        </div>
+
+                        <div class="button-group"
+                            style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
+                            <button id="btn-process-advances" class="btn-process"
+                                style="background-color: #fd7e14; border-color: #e67e22; flex: 1;">
+                                Process & Download Advances
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            ✓ Multiple sheets consolidated | ✓ Dates formatted as DD-MM-YYYY | ✓ Log generated
+                        </small>
+                    </div>
+
+                    <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
+                        <button class="btn-nav btn-prev" onclick="openTab(event, 'Sales')">← Previous Tab</button>
+                        <button class="btn-nav btn-next" onclick="openTab(event, 'Banking')">Next Tab →</button>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Banking/Collection Content -->
+                <div id="Banking" class="tab-content">
+                    <h2>Banking / Collection Data Processing</h2>
+                    <div class="log-summary-box" id="log-summary-banking" style="margin-bottom:12px; display:none;">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <!-- SECTION: PROCESS BANKING FILES -->
+                    <div
+                        style="border: 2px solid #6f42c1; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f8f5ff;">
+                        <h3 style="color: #6f42c1; margin-top: 0;">Step 1: Add & Process Bank Files</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Select banks and upload their transaction files for processing.
+                        </p>
+
+                        <div class="bank-controls"
+                            style="border-bottom: 1px solid #ddd; margin-bottom: 20px; padding-bottom: 20px;">
+                            <select id="bank-select-dropdown" class="bank-dropdown">
+                                <option value="">Select a Bank...</option>
+                                {% for name in bank_names %}
+                                <option value="{{ name }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button id="add-bank-btn" class="btn-process"
+                                style="background-color: #6f42c1; border-color: #5a32a3;">
+                                + Add Bank
+                            </button>
+                            <button id="add-all-banks-btn" class="btn-process"
+                                style="background-color: #5a32a3; border-color: #4a2885; margin-left: 10px;">
+                                + Add All Banks
+                            </button>
+                        </div>
+
+                        <div id="bank-uploads-container">
+                            <!-- New bank upload boxes will be added here by JavaScript -->
+                        </div>
+
+                        <div class="button-group"
+                            style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
+                            <button id="btn-process-banking" class="btn-process"
+                                style="background-color: #6f42c1; border-color: #5a32a3; flex: 1;">
+                                Process & Download All Banks
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            ✓ Multiple banks supported | ✓ Date range filtering | ✓ Automatic formatting | ✓ Log
+                            generated
+                        </small>
+                    </div>
+
+                    <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
+                        <button class="btn-nav btn-prev" onclick="openTab(event, 'Advances')">← Previous Tab</button>
+                        <button class="btn-nav btn-next" onclick="openTab(event, 'FinalProcess')">Next Tab →</button>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Final Process Content - FULLY INDEPENDENT SECTIONS -->
+                <div id="FinalProcess" class="tab-content">
+                    <h2>Final Process - Step by Step</h2>
+                    <div class="log-summary-box" id="log-summary-final" style="margin-bottom:12px; display:none;">
+                        <!-- populated by JS -->
+                    </div>
+
+                    <!-- SECTION A: PROCESS COMBINE MIS FILES -->
+                    <div
+                        style="border: 2px solid #17a2b8; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0f8ff;">
+                        <h3 style="color: #17a2b8; margin-top: 0;">Step A: Process Combine MIS Files</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Clean and standardize your Combine MIS data file(s).
+                        </p>
+
+                        <div class="file-upload-group" style="margin-bottom: 15px;">
+                            <label for="file-combine-mis-process"
+                                style="display: block; font-weight: 600; margin-bottom: 5px; color: #17a2b8;">
+                                Select Combine MIS File(s)
+                            </label>
+                            <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+                                Supports: .xls, .xlsx, .xlsm, .csv, .xlsb - Can select multiple files
+                            </p>
+                            <input type="file" id="file-combine-mis-process" class="file-input"
+                                accept=".xls,.xlsx,.xlsm,.csv,.xlsb" multiple>
+                        </div>
+
+                        <div class="button-group"
+                            style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
+                            <button id="btn-process-combine-only" class="btn-process"
+                                style="background-color: #17a2b8; border-color: #117a8b; flex: 1;">
+                                Process & Download Combine MIS
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            ✓ Concatenates MIS data from row 3 | ✓ Appends CK match key | ✓ Applies formatting | ✓ After
+                            download, save for Step B
+                        </small>
+                    </div>
+
+                    <!-- SECTION B: PROCESS FINAL MIS FILE -->
+                    <div
+                        style="border: 2px solid #28a745; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0fff4;">
+                        <h3 style="color: #28a745; margin-top: 0;">Step B: Process Final MIS File</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Update your Final MIS template with processed Combine data.
+                        </p>
+
+                        <div class="file-upload-group" style="margin-bottom: 15px;">
+                            <label for="file-final-mis-process"
+                                style="display: block; font-weight: 600; margin-bottom: 5px; color: #28a745;">
+                                Select Final MIS File
+                            </label>
+                            <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+                                Supports: .xls, .xlsx, .xlsm, .csv, .xlsb - Single file (your template)
+                            </p>
+                            <input type="file" id="file-final-mis-process" class="file-input"
+                                accept=".xls,.xlsx,.xlsm,.csv,.xlsb">
+                        </div>
+
+                        <div class="button-group"
+                            style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
+                            <button id="btn-process-final-only" class="btn-process"
+                                style="background-color: #28a745; border-color: #1e7e34; flex: 1;">
+                                Process & Download Final MIS
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 10px; color: #666;">
+                            ✓ Updates Reconciliation sheet | ✓ Preserves other sheets | ✓ Applies formatting | ✓ Log
+                            generated
+                        </small>
+                    </div>
+
+                </div>
+
+                <!-- Tab 5: Split File Content -->
+                <div id="SplitFile" class="tab-content">
+                    <h2>Split Main File</h2>
+
+                    <div
+                        style="border: 2px solid #6366f1; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #eef2ff;">
+                        <h3 style="color: #4338ca; margin-top: 0;">Step 1: Split File by Column</h3>
+                        <p style="color: #555; margin-bottom: 15px;">
+                            <strong>Purpose:</strong> Split a large Excel file into multiple files based on unique
+                            values in a specific column.
+                        </p>
+
+                        <form action="{{ url_for('process_split_file') }}" method="POST" enctype="multipart/form-data">
+                            <div class="file-upload-group" style="margin-bottom: 15px;">
+                                <label
+                                    style="display: block; font-weight: 600; margin-bottom: 5px; color: #4338ca;">Select
+                                    File to Split</label>
+                                <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Supports: .xls, .xlsx, .xlsm,
+                                    .csv, .xlsb</p>
+                                <input type="file" name="split_file" class="file-input"
+                                    accept=".xls,.xlsx,.xlsm,.csv,.xlsb" required
+                                    style="width:100%; padding:10px; border:1px solid #c7d2fe; border-radius:4px;">
+                            </div>
+
+                            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-weight: 600; margin-bottom: 5px; color: #4338ca;">Split
+                                        Column Name</label>
+                                    <input type="text" name="split_column" value="AMVIAK SPOC"
+                                        style="width:100%; padding:8px; border:1px solid #c7d2fe; border-radius:4px;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label
+                                        style="display: block; font-weight: 600; margin-bottom: 5px; color: #4338ca;">Sheet
+                                        Name (Optional)</label>
+                                    <input type="text" name="sheet_name" placeholder="Reconciliation by Date by Store"
+                                        style="width:100%; padding:8px; border:1px solid #c7d2fe; border-radius:4px;">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-process"
+                                style="background-color: #6366f1; border-color: #4f46e5; width: 100%;">
+                                ✂ Split & Download
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Tab 1: Sales Content -->
-        <div id="Sales" class="tab-content">
-            <h2>Sales Data Processing</h2>
-            <div class="log-summary-box" id="log-summary-sales" style="margin-bottom:12px; display:none;">
-                <!-- populated by JS -->
+    <!-- Add/Edit Prompt Modal -->
+    <div id="prompt-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="prompt-modal-title" style="margin-top:0">Add New Prompt</h3>
+            <input type="hidden" id="prompt-id">
+            <div style="margin-bottom: 10px;">
+                <label style="display:block; font-size:0.9rem; margin-bottom:4px;">Title</label>
+                <input type="text" id="prompt-title-input"
+                    style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
             </div>
-            
-            <!-- SECTION: PROCESS SALES FILE -->
-            <div style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0f7ff;">
-                <h3 style="color: #007bff; margin-top: 0;">Step 1: Process Sales File</h3>
-                <p style="color: #555; margin-bottom: 15px;">
-                    <strong>Purpose:</strong> Load and process your Sales data file with automatic formatting applied.
-                </p>
-                
-                <div class="file-upload-group" style="margin-bottom: 15px;">
-                    <label for="file-sales" style="display: block; font-weight: 600; margin-bottom: 5px; color: #007bff;">
-                        Select Sales File
-                    </label>
-                    <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
-                        Supports: .xls, .xlsx, .xlsm, .csv - Single file required
-                    </p>
-                    <input type="file" id="file-sales" class="file-input" accept=".xls,.xlsx,.xlsm,.csv">
-                </div>
-
-                <div class="button-group" style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
-                    <button id="btn-process-sales" class="btn-process" style="background-color: #007bff; border-color: #0056b3; flex: 1;">
-                        Process & Download Sales
-                    </button>
-                </div>
-                <small style="display: block; margin-top: 10px; color: #666;">
-                    ✓ Dates formatted as DD-MM-YYYY | ✓ Data validated and cleaned | ✓ Log generated
-                </small>
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; font-size:0.9rem; margin-bottom:4px;">Search Query / Content</label>
+                <textarea id="prompt-content-input" rows="4"
+                    style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;"></textarea>
             </div>
-
-            <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
-                <div></div>
-                <button class="btn-nav btn-next" onclick="openTab(event, 'Advances')">Next Tab →</button>
+            <div style="text-align: right;">
+                <button onclick="closePromptModal()"
+                    style="background: #ccc; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Cancel</button>
+                <button onclick="savePrompt()"
+                    style="background: #3b82f6; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-left:8px;">Save</button>
             </div>
         </div>
+    </div>
 
-        <!-- Tab 2: Advances Content -->
-        <div id="Advances" class="tab-content">
-            <h2>Advances Data Processing</h2>
-            <div class="log-summary-box" id="log-summary-advances" style="margin-bottom:12px; display:none;">
-                <!-- populated by JS -->
-            </div>
-            
-            <!-- SECTION: PROCESS ADVANCES FILE -->
-            <div style="border: 2px solid #fd7e14; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #fff8f0;">
-                <h3 style="color: #fd7e14; margin-top: 0;">Step 1: Process Advances File</h3>
-                <p style="color: #555; margin-bottom: 15px;">
-                    <strong>Purpose:</strong> Load and process your Advances data with automatic consolidation and formatting.
-                </p>
-                
-                <div class="file-upload-group" style="margin-bottom: 15px;">
-                    <label for="file-advances" style="display: block; font-weight: 600; margin-bottom: 5px; color: #fd7e14;">
-                        Select Advances File
-                    </label>
-                    <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
-                        Supports: .xls, .xlsx, .xlsm, .csv - Single file required
-                    </p>
-                    <input type="file" id="file-advances" class="file-input" accept=".xls,.xlsx,.xlsm,.csv">
-                </div>
-
-                <div class="button-group" style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
-                    <button id="btn-process-advances" class="btn-process" style="background-color: #fd7e14; border-color: #e67e22; flex: 1;">
-                        Process & Download Advances
+    <!-- Search Results Modal -->
+    <div id="search-results-modal" class="modal">
+        <div class="modal-content" style="display:flex; flex-direction:column; height:80vh;">
+            <!-- Header -->
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid #eee;">
+                <h3 style="margin:0; font-size:1.25rem;">Search Results</h3>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button id="btn-export-search"
+                        style="background:#28a745; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:0.9rem;">
+                        📥 Export Excel
+                    </button>
+                    <button onclick="toggleModalMaximize()" title="Maximize"
+                        style="background:none; border:none; font-size:1.2rem; cursor:pointer;">
+                        ⛶
+                    </button>
+                    <button onclick="document.getElementById('search-results-modal').style.display='none'"
+                        style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">
+                        &times;
                     </button>
                 </div>
-                <small style="display: block; margin-top: 10px; color: #666;">
-                    ✓ Multiple sheets consolidated | ✓ Dates formatted as DD-MM-YYYY | ✓ Log generated
-                </small>
             </div>
 
-            <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
-                <button class="btn-nav btn-prev" onclick="openTab(event, 'Sales')">← Previous Tab</button>
-                <button class="btn-nav btn-next" onclick="openTab(event, 'Banking')">Next Tab →</button>
-            </div>
-        </div>
-
-        <!-- Tab 3: Banking/Collection Content -->
-        <div id="Banking" class="tab-content">
-            <h2>Banking / Collection Data Processing</h2>
-            <div class="log-summary-box" id="log-summary-banking" style="margin-bottom:12px; display:none;">
-                <!-- populated by JS -->
-            </div>
-            
-            <!-- SECTION: PROCESS BANKING FILES -->
-            <div style="border: 2px solid #6f42c1; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f8f5ff;">
-                <h3 style="color: #6f42c1; margin-top: 0;">Step 1: Add & Process Bank Files</h3>
-                <p style="color: #555; margin-bottom: 15px;">
-                    <strong>Purpose:</strong> Select banks and upload their transaction files for processing.
-                </p>
-                
-                <div class="bank-controls" style="border-bottom: 1px solid #ddd; margin-bottom: 20px; padding-bottom: 20px;">
-                    <select id="bank-select-dropdown" class="bank-dropdown">
-                        <option value="">Select a Bank...</option>
-                        {% for name in bank_names %}
-                        <option value="{{ name }}">{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                    <button id="add-bank-btn" class="btn-process" style="background-color: #6f42c1; border-color: #5a32a3;">
-                        + Add Bank
-                    </button>
+            <!-- Stats & Chart Area -->
+            <div id="search-stats-area"
+                style="padding:15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:none;">
+                <div style="display:flex; gap:20px; align-items:center; margin-bottom:10px;">
+                    <div class="stat-box">
+                        <span style="display:block; font-size:0.8rem; color:#666;">Total Matches</span>
+                        <strong id="stat-total-count" style="font-size:1.2rem;">0</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span style="display:block; font-size:0.8rem; color:#666;">Total Value</span>
+                        <strong id="stat-total-value" style="font-size:1.2rem; color:#28a745;">0.00</strong>
+                    </div>
+                    <div style="flex-grow:1; height:100px;">
+                        <canvas id="searchChart" style="max-height:100px; width:100%;"></canvas>
+                    </div>
                 </div>
-                
-                <div id="bank-uploads-container">
-                    <!-- New bank upload boxes will be added here by JavaScript -->
-                </div>
-                
-                <div class="button-group" style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
-                    <button id="btn-process-banking" class="btn-process" style="background-color: #6f42c1; border-color: #5a32a3; flex: 1;">
-                        Process & Download All Banks
-                    </button>
-                </div>
-                <small style="display: block; margin-top: 10px; color: #666;">
-                    ✓ Multiple banks supported | ✓ Date range filtering | ✓ Automatic formatting | ✓ Log generated
-                </small>
             </div>
 
-            <div class="button-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 0;">
-                <button class="btn-nav btn-prev" onclick="openTab(event, 'Advances')">← Previous Tab</button>
-                <button class="btn-nav btn-next" onclick="openTab(event, 'FinalProcess')">Next Tab →</button>
+            <!-- Results Body -->
+            <div id="search-results-body" style="flex-grow:1; overflow:auto; padding-top:10px;">
+                <!-- Results go here -->
             </div>
-        </div>
-
-        <!-- Tab 4: Final Process Content - FULLY INDEPENDENT SECTIONS -->
-        <div id="FinalProcess" class="tab-content">
-            <h2>Final Process - Step by Step</h2>
-            <div class="log-summary-box" id="log-summary-final" style="margin-bottom:12px; display:none;">
-                <!-- populated by JS -->
-            </div>
-            
-            <!-- SECTION A: PROCESS COMBINE MIS FILES -->
-            <div style="border: 2px solid #17a2b8; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0f8ff;">
-                <h3 style="color: #17a2b8; margin-top: 0;">Step A: Process Combine MIS Files</h3>
-                <p style="color: #555; margin-bottom: 15px;">
-                    <strong>Purpose:</strong> Clean and standardize your Combine MIS data file(s).
-                </p>
-                
-                <div class="file-upload-group" style="margin-bottom: 15px;">
-                    <label for="file-combine-mis-process" style="display: block; font-weight: 600; margin-bottom: 5px; color: #17a2b8;">
-                        Select Combine MIS File(s)
-                    </label>
-                    <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
-                        Supports: .xls, .xlsx, .xlsm, .csv, .xlsb - Can select multiple files
-                    </p>
-                    <input type="file" id="file-combine-mis-process" class="file-input" accept=".xls,.xlsx,.xlsm,.csv,.xlsb" multiple>
-                </div>
-
-                <div class="button-group" style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
-                    <button id="btn-process-combine-only" class="btn-process" style="background-color: #17a2b8; border-color: #117a8b; flex: 1;">
-                        Process & Download Combine MIS
-                    </button>
-                </div>
-                <small style="display: block; margin-top: 10px; color: #666;">
-                    ✓ Concatenates MIS data from row 3 | ✓ Appends CK match key | ✓ Applies formatting | ✓ After download, save for Step B
-                </small>
-            </div>
-            
-            <!-- SECTION B: PROCESS FINAL MIS FILE -->
-            <div style="border: 2px solid #28a745; border-radius: 8px; padding: 20px; margin-bottom: 30px; background-color: #f0fff4;">
-                <h3 style="color: #28a745; margin-top: 0;">Step B: Process Final MIS File</h3>
-                <p style="color: #555; margin-bottom: 15px;">
-                    <strong>Purpose:</strong> Update your Final MIS template with processed Combine data.
-                </p>
-                
-                <div class="file-upload-group" style="margin-bottom: 15px;">
-                    <label for="file-final-mis-process" style="display: block; font-weight: 600; margin-bottom: 5px; color: #28a745;">
-                        Select Final MIS File
-                    </label>
-                    <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">
-                        Supports: .xls, .xlsx, .xlsm, .csv, .xlsb - Single file (your template)
-                    </p>
-                    <input type="file" id="file-final-mis-process" class="file-input" accept=".xls,.xlsx,.xlsm,.csv,.xlsb">
-                </div>
-
-                <div class="button-group" style="gap: 10px; border-top: 1px solid #ddd; padding-top: 20px; margin-top: 15px;">
-                    <button id="btn-process-final-only" class="btn-process" style="background-color: #28a745; border-color: #1e7e34; flex: 1;">
-                        Process & Download Final MIS
-                    </button>
-                </div>
-                <small style="display: block; margin-top: 10px; color: #666;">
-                    ✓ Updates Reconciliation sheet | ✓ Preserves other sheets | ✓ Applies formatting | ✓ Log generated
-                </small>
-            </div>
-            
         </div>
     </div>
 
@@ -234,5 +500,111 @@
 
     <!-- Cache-busting for JS -->
     <script src="{{ url_for('static', filename='script.js') }}?v={{ cache_v }}"></script>
+
+    <!-- Inline Initializer for Prompts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.initPrompts) window.initPrompts();
+        });
+
+        // --- NEW DASHBOARD SEARCH LOGIC ---
+        let dashboardSearchResults = [];
+
+        function performDashboardSearch() {
+            const query = document.getElementById('dash-search-query').value.trim();
+            const catCBs = document.querySelectorAll('.dash-cat-cb:checked');
+            const modeCBs = document.querySelectorAll('.dash-mode-cb:checked');
+
+            if (!query && catCBs.length === 0 && modeCBs.length === 0) {
+                alert("Please enter a query or select filters.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('query', query);
+            catCBs.forEach(cb => formData.append('categories[]', cb.value));
+            modeCBs.forEach(cb => formData.append('payment_modes[]', cb.value));
+
+            // Show Loading
+            const resArea = document.getElementById('dash-results-area');
+            const tbody = document.getElementById('dash-results-tbody');
+            const noRes = document.getElementById('dash-no-results');
+
+            resArea.style.display = 'block';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Searching...</td></tr>';
+            noRes.style.display = 'none';
+
+            fetch('/api/search_dashboard', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        tbody.innerHTML = '';
+                        return;
+                    }
+
+                    dashboardSearchResults = data.results || [];
+                    renderDashboardResults();
+                })
+                .catch(err => {
+                    alert('Search failed: ' + err);
+                    tbody.innerHTML = '';
+                });
+        }
+
+        function renderDashboardResults() {
+            const tbody = document.getElementById('dash-results-tbody');
+            const noRes = document.getElementById('dash-no-results');
+            tbody.innerHTML = '';
+
+            if (dashboardSearchResults.length === 0) {
+                noRes.style.display = 'block';
+                return;
+            }
+            noRes.style.display = 'none';
+
+            dashboardSearchResults.forEach(res => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #eee';
+
+                // Format snippet
+                const snippet = JSON.stringify(res.data).substring(0, 100) + '...';
+
+                tr.innerHTML = `
+                    <td style="padding: 10px;">${res.sheet}</td>
+                    <td style="padding: 10px;">${res.row}</td>
+                    <td style="padding: 10px; color: #2563eb;">${res.matched_columns}</td>
+                    <td style="padding: 10px; font-size: 0.85em; color: #555;">${snippet}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportDashboardSearch() {
+            if (dashboardSearchResults.length === 0) {
+                alert("No results to export.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Sheet,Row,MatchedColumns,Data\n";
+
+            dashboardSearchResults.forEach(res => {
+                const dataStr = JSON.stringify(res.data).replace(/"/g, '""');
+                csvContent += `${res.sheet},${res.row},"${res.matched_columns}","${dataStr}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "search_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
+
+</html>
+
 </html>

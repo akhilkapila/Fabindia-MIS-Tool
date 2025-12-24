@@ -1,0 +1,3 @@
+2025-12-16 14:36:47,557 - INFO - Starting process: process_banking
+2025-12-16 14:36:47,557 - INFO - Received banking process request
+2025-12-16 14:39:03,323 - INFO - Saved banking workbook to temp_uploads\3ef609e3-a879-47c3-81c0-8053597e0751_banking.xlsx (Success=True)

@@ -1,0 +1,14 @@
+2025-12-20 19:01:57,106 - INFO - Starting process: process_combine_only
+2025-12-20 19:01:59,292 - INFO - File 'APTL_GjMP_Ritu_Dec'25.xlsb': Found sheet 'MIS Working'
+2025-12-20 19:01:59,306 - INFO - File 'APTL_GjMP_Ritu_Dec'25.xlsb': Added 2263 rows.
+2025-12-20 19:02:01,354 - INFO - File 'DMR1-Chander Dec'25.xlsb': Found sheet 'MIS working'
+2025-12-20 19:02:01,378 - INFO - File 'DMR1-Chander Dec'25.xlsb': Added 2418 rows.
+2025-12-20 19:03:47,312 - INFO - File 'DMR2 & Rj -Ritu_Dec'25.xlsb': Found sheet 'MIS Working'
+2025-12-20 19:03:47,328 - INFO - File 'DMR2 & Rj -Ritu_Dec'25.xlsb': Added 2263 rows.
+2025-12-20 19:03:48,569 - INFO - File 'Kargoa MIS 8th Dec'25 to 9th Dec'25.xlsb': Found sheet 'MIS WORKING'
+2025-12-20 19:03:48,578 - INFO - File 'Kargoa MIS 8th Dec'25 to 9th Dec'25.xlsb': Added 1798 rows.
+2025-12-20 19:03:49,828 - INFO - File 'KLTN MIS 8th Dec'25 to 9th Dec'25.xlsb': Found sheet 'MIS Working'
+2025-12-20 19:03:49,840 - INFO - File 'KLTN MIS 8th Dec'25 to 9th Dec'25.xlsb': Added 1922 rows.
+2025-12-20 19:03:53,742 - INFO - File 'Maha_Venue_East_Sarthak_Dec'25 2.O.xlsb': Found sheet 'MIS Working'
+2025-12-20 19:03:53,778 - INFO - File 'Maha_Venue_East_Sarthak_Dec'25 2.O.xlsb': Added 4836 rows.
+2025-12-20 19:03:54,203 - INFO - Col 'Date': Converted 15500 Excel serial dates

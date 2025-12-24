@@ -1,0 +1,8 @@
+2025-12-20 18:16:49,057 - INFO - Starting process: process_combine_only
+2025-12-20 18:16:51,918 - INFO - File 'APTL_GjMP_Ritu_Nov'25.xlsx': Found sheet 'MIS Working'
+2025-12-20 18:16:51,937 - INFO - File 'APTL_GjMP_Ritu_Nov'25.xlsx': Added 2190 rows.
+2025-12-20 18:16:54,100 - INFO - File 'DMR1-RJ_Chander Nov'25.xlsb': Found sheet 'MIS Working'
+2025-12-20 18:16:54,119 - INFO - File 'DMR1-RJ_Chander Nov'25.xlsb': Added 2520 rows.
+2025-12-20 18:18:37,252 - INFO - File 'DMR2-Ritu_Nov'25 - 2.xlsb': Found sheet 'MIS Working'
+2025-12-20 18:18:37,274 - INFO - File 'DMR2-Ritu_Nov'25 - 2.xlsb': Added 1890 rows.
+2025-12-20 18:18:37,452 - INFO - Col 'Date': Converted 4410 Excel serial dates

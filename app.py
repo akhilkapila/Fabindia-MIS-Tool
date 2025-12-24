@@ -54,7 +54,7 @@ LOG_FOLDER = os.path.join(UPLOAD_FOLDER, 'logs')
 os.makedirs(LOG_FOLDER, exist_ok=True)
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- 2. LOGIN MANAGER CONFIGURATION ---
 login_manager = LoginManager()
@@ -115,6 +115,24 @@ class BankRule(db.Model):
     start_row = db.Column(db.Integer, nullable=False, default=2)
     sheet_name = db.Column(db.String(100), nullable=False, default='Sheet1')
     mappings = db.Column(db.Text, nullable=False)
+
+class SearchFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    filepath = db.Column(db.String(255), nullable=False)
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class SearchCategoryRule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category_name = db.Column(db.String(50), unique=True, nullable=False)
+    sheet_name = db.Column(db.String(100), nullable=False)
+
+class SearchPaymentModeRule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    mode_name = db.Column(db.String(50), nullable=False) # Not Unique anymore
+    columns = db.Column(db.String(255), nullable=False) # Comma separated keywords
+    sheet_name = db.Column(db.String(255), nullable=True) # Multiselect sheets, comma separated
+
 
 # --- 4. HELPER FUNCTIONS (ROBUST FILE LOADER) ---
 def load_file_smartly(file, sheet_name, start_row):
@@ -495,7 +513,13 @@ def home():
     banks = db.session.execute(db.select(BankRule).order_by(BankRule.bank_name)).scalars().all()
     bank_names = [b.bank_name for b in banks]
     last_log = session.get('last_process_log')
-    return render_template('index.html', admin_portal=current_user.is_admin, bank_names=bank_names, current_user=current_user, last_log=last_log)
+    
+    search_categories = db.session.execute(db.select(SearchCategoryRule).order_by(SearchCategoryRule.category_name)).scalars().all()
+    search_modes = db.session.execute(db.select(SearchPaymentModeRule).order_by(SearchPaymentModeRule.mode_name)).scalars().all()
+    search_file = db.session.execute(db.select(SearchFile)).scalar_one_or_none()
+    
+    return render_template('index.html', admin_portal=current_user.is_admin, bank_names=bank_names, current_user=current_user, last_log=last_log,
+                           search_categories=search_categories, search_modes=search_modes, search_file=search_file)
 
 
 @app.route('/processing-log')
@@ -1125,8 +1149,13 @@ def admin_portal():
     
     active_tab = request.args.get('tab', None)
     banks = db.session.execute(db.select(BankRule).order_by(BankRule.bank_name)).scalars().all()
+    # prompts removed
     pending_users = db.session.execute(db.select(User).filter_by(is_approved=False, is_admin=False).order_by(User.name)).scalars().all()
     approved_users = db.session.execute(db.select(User).filter_by(is_approved=True, is_admin=False).order_by(User.name)).scalars().all()
+    
+    search_categories = db.session.execute(db.select(SearchCategoryRule).order_by(SearchCategoryRule.category_name)).scalars().all()
+    search_modes = db.session.execute(db.select(SearchPaymentModeRule).order_by(SearchPaymentModeRule.mode_name)).scalars().all()
+    search_file = db.session.execute(db.select(SearchFile)).scalar_one_or_none()
 
     output_cols_data = {
         'sales': {'str': get_output_columns_str_with_letters('sales_output_columns'), 'json': json.dumps(get_output_columns('sales_output_columns'))},
@@ -1148,6 +1177,10 @@ def admin_portal():
         'admin.html',
         title='Admin Portal',
         banks=banks,
+        # prompts removed
+        search_categories=search_categories, # Pass categories
+        search_modes=search_modes, # Pass modes
+        search_file=search_file, # Pass file
         banks_json=json.dumps([serialize_rule(b) for b in banks]),
         sales_rule_json=json.dumps(serialize_rule(sales_rule)),
         advance_rule_json=json.dumps(serialize_rule(advance_rule)),
@@ -1481,6 +1514,21 @@ def create_default_data():
             adv_rule = AdvanceRule(id=1, start_row=2, sheet_name='Sheet', mappings=json.dumps({"Store": "Store"}), vlookup_source_col = 'Store', vlookup_sales_col = 'StoreName', vlookup_dest_col = 'Store Code', vlookup_value_col = 'StoreCode')
             db.session.add(adv_rule)
         
+        # --- DEFAULT SEARCH RULES ---
+        if not db.session.execute(db.select(SearchCategoryRule).filter_by(category_name='Sales')).scalar_one_or_none():
+            db.session.add(SearchCategoryRule(category_name='Sales', sheet_name='Sheet1')) 
+        if not db.session.execute(db.select(SearchCategoryRule).filter_by(category_name='Advances')).scalar_one_or_none():
+             db.session.add(SearchCategoryRule(category_name='Advances', sheet_name='Sheet1'))
+        if not db.session.execute(db.select(SearchCategoryRule).filter_by(category_name='Banking')).scalar_one_or_none():
+             db.session.add(SearchCategoryRule(category_name='Banking', sheet_name='Collection'))
+
+        if not db.session.execute(db.select(SearchPaymentModeRule).filter_by(mode_name='Cash')).scalar_one_or_none():
+            db.session.add(SearchPaymentModeRule(mode_name='Cash', columns='Cash,Cash Amount,HB-Cash,MR-Cash,CO-Cash,Ad-Cash'))
+        if not db.session.execute(db.select(SearchPaymentModeRule).filter_by(mode_name='Card')).scalar_one_or_none():
+            db.session.add(SearchPaymentModeRule(mode_name='Card', columns='Card,Credit Card,HB-Card,MR-Card,CO-Card,Ad-Card'))
+        if not db.session.execute(db.select(SearchPaymentModeRule).filter_by(mode_name='Online')).scalar_one_or_none():
+            db.session.add(SearchPaymentModeRule(mode_name='Online', columns='Online,Online Payment,Paytm,HB-Online,MR-Online,CO-Online,Ad-Online'))
+        
         # --- AMEX RULE: Managed in Admin Portal ---
         # Amex rule configuration is managed via Admin Portal.
         # No auto-repair necessary - user has full control.
@@ -1491,154 +1539,148 @@ def create_default_data():
 @app.route('/process-combine-only', methods=['POST'])
 @login_required
 def process_combine_only():
-    """Process ONLY Combine MIS files - Returns processed data without merging."""
+    """
+    Step A: Process Combine MIS Files (NEW SIMPLE LOGIC)
+    - Multi-file support
+    - Target specific sheet starting with "MIS Working"
+    - Start from 3rd row (header=2)
+    - Clean merge
+    """
+    # Start logger
+    logger, log_path = start_process_logger('process_combine_only')
+    
     try:
         combine_files = request.files.getlist('combine_mis')
-        
         if not combine_files:
             return jsonify({"error": "Please select Combine MIS file(s)."}), 400
-        
-        # Load and combine all files
+
         combined_data_list = []
+        
         for file in combine_files:
+            filename = file.filename
+            file_ext = os.path.splitext(filename)[1].lower()
+            df = None
+            
             try:
-                df = load_file_smartly(file, "MIS Working", 3)
-                combined_data_list.append(df)
-                print(f"Loaded combine file: {file.filename}")
-            except Exception as e:
-                print(f"Error loading combine file {file.filename}: {e}")
-                return jsonify({"error": f"Failed to load {file.filename}: {str(e)}"}), 400
-        
-        if not combined_data_list:
-            return jsonify({"error": "No data found in Combine MIS files."}), 400
-        
-        # Combine all data
-        master_combine_df = pd.concat(combined_data_list, ignore_index=True)
-        master_combine_df.columns = master_combine_df.columns.astype(str).str.strip()
+                # 1. Handle Excel Files (xlsx, xls, xlsb, xlsm)
+                if file_ext in ['.xlsx', '.xls', '.xlsb', '.xlsm']:
+                    # We need to find the sheet starting with "MIS Working"
+                    file.seek(0)
+                    target_sheet = None
+                    engine = 'pyxlsb' if file_ext == '.xlsb' else None
+                    
+                    try:
+                        xls = pd.ExcelFile(file, engine=engine)
+                        sheet_names = xls.sheet_names
+                        
+                        # Find matching sheet
+                        for sheet in sheet_names:
+                            if sheet.strip().lower().startswith('mis working'):
+                                target_sheet = sheet
+                                break
+                        
+                        if target_sheet:
+                            # Load data from 3rd row (header=2)
+                            df = pd.read_excel(xls, sheet_name=target_sheet, header=2, dtype=str)
+                            logger.info(f"File '{filename}': Found sheet '{target_sheet}'")
+                        else:
+                            logger.warning(f"File '{filename}': No sheet starting with 'MIS Working' found. Skipping.")
+                            continue 
+                            
+                    except Exception as e:
+                        logger.error(f"Error inspecting Excel file {filename}: {e}")
+                        continue
 
-        print(f"DEBUG Combine Only: Combined columns: {list(master_combine_df.columns)}")
+                # 2. Handle CSV Files
+                elif file_ext == '.csv':
+                    file.seek(0)
+                    try:
+                        df = pd.read_csv(file, header=2, dtype=str, encoding_errors='replace')
+                    except Exception:
+                        file.seek(0)
+                        df = pd.read_csv(file, header=2, dtype=str, encoding='latin1')
 
-        # --- ENHANCEMENTS REQUESTED BY USER ---
-        # 1) Append a `CK` column as the last column (store + date matchkey if available)
-        # 2) Convert numeric-like columns to literal values (paste values)
-        # 3) Detect date column and convert to datetime (short date formatting preserved)
-        # 4) After writing, highlight fully-blank columns with black fill and white font
-        # 5) For columns containing alphabetic characters, set Excel format to 'General'
-
-        df = master_combine_df.copy()
-        # Detect store/date columns using existing heuristics
-        try:
-            combine_store_col = find_column_by_keywords(df, ['STORE', 'CODE']) or find_column_by_keywords(df, ['STORE'])
-        except Exception:
-            combine_store_col = None
-        try:
-            combine_date_col = find_column_by_keywords(df, ['DATE']) or find_column_by_keywords(df, ['BILL', 'DATE'])
-        except Exception:
-            combine_date_col = None
-
-        # Normalize strings
-        df.columns = df.columns.astype(str).str.strip()
-
-        # Robust Date Detection: prefer name-based detection, else pick column with highest date-parseable fraction
-        detected_date_col = None
-        if combine_date_col and combine_date_col in df.columns:
-            # verify values actually parse to dates (avoid numeric store codes)
-            parsed = pd.to_datetime(df[combine_date_col], errors='coerce')
-            frac = parsed.notna().sum() / max(1, df[combine_date_col].notna().sum())
-            if frac >= 0.3:
-                detected_date_col = combine_date_col
-
-        if not detected_date_col:
-            # content-based detection: check each column for date-parseable fraction
-            best_col = None
-            best_frac = 0.0
-            for col in df.columns:
-                # skip obvious store-code candidates by name
-                if isinstance(col, str) and ('STORE' in col.upper() and 'CODE' in col.upper()):
+                else:
+                    logger.warning(f"Skipping unsupported file: {filename}")
                     continue
-                series = df[col]
-                # if mostly numeric without date patterns, skip
-                as_num = pd.to_numeric(series.astype(str).str.replace(r"[^0-9.-]", '', regex=True), errors='coerce')
-                num_frac = as_num.notna().sum() / max(1, series.notna().sum())
-                parsed = pd.to_datetime(series, errors='coerce')
-                date_frac = parsed.notna().sum() / max(1, series.notna().sum())
-                # choose column with highest date_frac but avoid columns that are dominantly numeric
-                if date_frac > best_frac and date_frac >= 0.5 and num_frac < 0.8:
-                    best_frac = date_frac
-                    best_col = col
-            detected_date_col = best_col
 
-        # Convert detected date column to datetime objects
-        if detected_date_col and detected_date_col in df.columns:
-            df[detected_date_col] = pd.to_datetime(df[detected_date_col], errors='coerce')
-        # keep earlier variable name for downstream compatibility
-        combine_date_col = detected_date_col
+                # 3. Process the DataFrame if loaded
+                if df is not None and not df.empty:
+                    # Clean columns: Strip whitespace
+                    df.columns = df.columns.astype(str).str.strip()
+                    # Clean rows: Drop empty rows
+                    df.dropna(how='all', inplace=True)
+                    
+                    if not df.empty:
+                        combined_data_list.append(df)
+                        logger.info(f"File '{filename}': Added {len(df)} rows.")
 
-        # Create CK column (use store + formatted date if possible)
-        if combine_store_col and combine_store_col in df.columns and combine_date_col and combine_date_col in df.columns:
-            df['CK'] = df[combine_store_col].astype(str).str.strip() + '_' + df[combine_date_col].dt.strftime('%d-%m-%Y').fillna('')
-        else:
-            # Append empty CK column
-            df['CK'] = ''
+            except Exception as e:
+                logger.error(f"Error processing file {filename}: {e}")
+                return jsonify({"error": f"Failed to process {filename}: {str(e)}"}), 400
 
-        # Ensure we only process columns from A..CK (Excel column CK is index 89)
-        MAX_COLS_A_TO_CK = 89
-        cols = df.columns.tolist()
-        # If CK exists, ensure it's included as the last column within the A..CK window
-        if 'CK' in cols:
-            # move CK to end if not already
-            cols = [c for c in cols if c != 'CK']
-            # if there are more than MAX_COLS_A_TO_CK-1 other columns, trim them
-            if len(cols) >= MAX_COLS_A_TO_CK:
-                cols = cols[:MAX_COLS_A_TO_CK-1]
-            cols = cols + ['CK']
-        else:
-            # No CK present (shouldn't happen), just trim or keep first MAX_COLS_A_TO_CK columns
-            if len(cols) > MAX_COLS_A_TO_CK:
-                cols = cols[:MAX_COLS_A_TO_CK]
+        # --- MERGE ---
+        if not combined_data_list:
+            return jsonify({"error": "No matching data found. Ensure files have a sheet starting with 'MIS Working'."}), 400
 
-        # Reindex df to selected columns (this will drop extra columns beyond CK)
-        df = df.loc[:, cols]
+        # Concatenate all
+        master_combine_df = pd.concat(combined_data_list, ignore_index=True)
+        # Final Clean
+        master_combine_df.dropna(how='all', inplace=True)
+        
+        # FIX: Deduplicate columns to prevent errors in loop
+        master_combine_df = master_combine_df.loc[:, ~master_combine_df.columns.duplicated()]
 
-        # Coerce numeric-like columns to numeric values where reasonable
-        for col in df.columns.tolist():
-            if col == combine_date_col:
-                continue
-            # If column is the CK we just added, keep as string
-            if col == 'CK':
-                df[col] = df[col].astype(str)
-                continue
-            # Preserve Remarks column exactly as-is
-            if isinstance(col, str) and col.strip().lower() == 'remarks':
-                # keep original values (no coercion)
-                continue
-            # Try to strip common currency/thousand characters and coerce
-            series_as_str = df[col].astype(str).replace('nan', '', regex=False)
-            cleaned = series_as_str.str.replace(r"[^0-9.\-]", '', regex=True)
-            coerced = pd.to_numeric(cleaned, errors='coerce')
-            orig_nonnull = df[col].notna().sum()
-            coerced_nonnull = coerced.notna().sum()
-            # If a majority of non-null values can be coerced to numeric, use numeric values
-            if orig_nonnull > 0 and coerced_nonnull / float(orig_nonnull) >= 0.6:
-                df[col] = coerced
-            else:
-                # Preserve text columns as strings, blank become None
-                df[col] = df[col].where(df[col].notna(), None)
-
-        # Persist processed combine file to uploads for Step B
-        # Persist processed combine file using optimized helper
+        # --- NEW REQUIREMENT: COLUMN LIMIT (A-CJ) [Index 0-87] ---
+        MAX_COLS = 86
+        if len(master_combine_df.columns) > MAX_COLS:
+            master_combine_df = master_combine_df.iloc[:, :MAX_COLS]
+        
+        # --- NEW REQUIREMENT: DATA FORMATTING ---
+        for col in master_combine_df.columns:
+            # 1. Check for Date
+            if isinstance(col, str) and 'DATE' in col.upper():
+                series = master_combine_df[col]
+                # Try to parse as numeric first to catch Excel serial dates
+                numeric_series = pd.to_numeric(series, errors='coerce')
+                
+                # Check for likely Excel serial dates (roughly years 1980-2100)
+                # 29221 = 1980-01-01, 73050 = 2100-01-01
+                mask_serial = numeric_series.notna() & (numeric_series > 25000) & (numeric_series < 80000)
+                
+                # Default parse as strings (dayfirst=True for DD-MM-YYYY)
+                date_series = pd.to_datetime(series, errors='coerce', dayfirst=True)
+                
+                # If we found serial dates, overwrite those entries
+                if mask_serial.any():
+                    try:
+                        # Excel epoch is usually 1899-12-30
+                        serial_dates = pd.to_datetime(numeric_series[mask_serial], unit='D', origin='1899-12-30')
+                        date_series.update(serial_dates)
+                        logger.info(f"Col '{col}': Converted {mask_serial.sum()} Excel serial dates")
+                    except Exception as e:
+                        logger.warning(f"Col '{col}': Failed to convert serial dates: {e}")
+                
+                master_combine_df[col] = date_series
+            
+            # 2. Check for Numeric logic
+            elif isinstance(col, str):
+                try:
+                    master_combine_df[col] = pd.to_numeric(master_combine_df[col], errors='ignore')
+                except Exception:
+                    pass
+                
+        # --- EXPORT ---
         processed_filename = f"{uuid.uuid4()}_processed_combine.xlsx"
         processed_filepath = os.path.join(UPLOAD_FOLDER, processed_filename)
-        
-        # Use save_with_formatting which handles black fill and General format
-        success = save_with_formatting(df, processed_filepath, sheet_name='Combining_MIS')
+
+        # Save using the existing logic or simple excel save
+        success = save_with_formatting(master_combine_df, processed_filepath, sheet_name='Combined_MIS')
         if not success:
-            print("Warning: save_with_formatting failed, check logs")
-        
-        # Store path in session so Step B can pick it up
+             master_combine_df.to_excel(processed_filepath, index=False)
+
         session['processed_combine_filepath'] = processed_filepath
 
-        # Return the processed file to client
         with open(processed_filepath, 'rb') as fbuf:
             data_bytes = fbuf.read()
 
@@ -1648,12 +1690,13 @@ def process_combine_only():
             download_name="Processed_Combine_MIS.xlsx",
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        
+
     except Exception as e:
-        print(f"Error in process_combine_only: {str(e)}")
+        logger.exception(f"Error in process_combine_only: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 
 # --- TEST-ONLY ENDPOINTS (no auth) ---
@@ -1911,8 +1954,33 @@ def process_final_only():
                 num_fmt = workbook.add_format({'num_format': 'General'})
 
                 for name, df_sheet in sheets.items():
-                    # clean columns
+                    # Clean columns
                     df_sheet.columns = df_sheet.columns.astype(str)
+                    
+                    # --- CRITICAL FIX: INFER DATA TYPES FOR "VALUE PASTE" ---
+                    # Since we loaded with dtype=str, strictly convert back where possible.
+                    for col in df_sheet.columns:
+                        # Skip ID-like columns that should remain text (optional heuristic)
+                        if 'CODE' in col.upper() or 'ID' in col.upper() or 'GST' in col.upper() or 'NUMBER' in col.upper() and 'BILL' not in col.upper():
+                             continue # Keep as text usually
+
+                        # 1. Try Numeric (Float/Int)
+                        # Remove common currency symbols if any
+                        try:
+                            # flexible numeric conversion
+                            numeric_series = pd.to_numeric(df_sheet[col], errors='coerce')
+                            # If significant portion is numeric, keep it
+                            non_na = numeric_series.notna().sum()
+                            total = len(df_sheet)
+                            if total > 0 and (non_na / total) > 0.3: # heuristic threshold
+                                df_sheet[col] = numeric_series
+                        except:
+                            pass
+
+                        # 2. Try Date (Strict Name Check + Content)
+                        if 'DATE' in col.upper():
+                             df_sheet[col] = pd.to_datetime(df_sheet[col], errors='coerce', dayfirst=True)
+
                     df_sheet.to_excel(writer, sheet_name=name, index=False)
                     ws = writer.sheets[name]
                     
@@ -2216,16 +2284,25 @@ def process_final_step():
             try:
                 # Read 'MIS Working' from row 3 (index 2)
                 df = load_file_smartly(file, "MIS Working", 3)
-                combined_data_list.append(df)
+                
+                df.columns = df.columns.astype(str).str.strip()
+                
+                # Remove completely empty rows to be safe
+                df = df.dropna(how='all')
+
+                if not df.empty:
+                    combined_data_list.append(df)
             except Exception as e:
                 print(f"Error loading combine file {file.filename}: {e}")
                 # Fail soft or hard? Let's fail hard to ensure data integrity
                 return jsonify({"error": f"Failed to load 'MIS Working' from {file.filename}: {str(e)}"}), 400
 
         if not combined_data_list:
-            return jsonify({"error": "No data found in Combine MIS files."}), 400
+            return jsonify({"error": "No valid data found in Combine MIS files."}), 400
 
         master_combine_df = pd.concat(combined_data_list, ignore_index=True)
+        master_combine_df = master_combine_df.dropna(how='all')
+        # Columns already stripped, but ensuring type consistency
         master_combine_df.columns = master_combine_df.columns.astype(str).str.strip()
         
         print(f"DEBUG: Combined DF columns: {list(master_combine_df.columns)}")
@@ -2379,13 +2456,630 @@ def process_final_step():
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+# --- 13. SEARCH & PROMPTS API (NEW feature) ---
+
+@app.route('/api/prompts', methods=['GET', 'POST'])
+@login_required
+def api_prompts():
+    if request.method == 'GET':
+        prompts = db.session.execute(db.select(Prompt).order_by(Prompt.title)).scalars().all()
+        return jsonify([{'id': p.id, 'title': p.title, 'content': p.content} for p in prompts])
+    
+    data = request.json
+    if not data or not data.get('title') or not data.get('content'):
+        return jsonify({"error": "Title and content required"}), 400
+    
+    prompt = Prompt(title=data['title'], content=data['content'])
+    db.session.add(prompt)
+    db.session.commit()
+    return jsonify({'id': prompt.id, 'title': prompt.title, 'content': prompt.content}), 201
+
+@app.route('/api/prompts/<int:id>', methods=['PUT', 'DELETE'])
+@login_required
+def api_prompt_item(id):
+    prompt = db.session.get(Prompt, id)
+    if not prompt:
+        return jsonify({"error": "Prompt not found"}), 404
         
-# --- 14. RUN THE APP (FINAL) ---
+    if request.method == 'DELETE':
+        db.session.delete(prompt)
+        db.session.commit()
+        return jsonify({"message": "Deleted"}), 200
+    
+    data = request.json
+    if 'title' in data: prompt.title = data['title']
+    if 'content' in data: prompt.content = data['content']
+    db.session.commit()
+    return jsonify({'id': prompt.id, 'title': prompt.title, 'content': prompt.content})
+
+@app.route('/api/search', methods=['GET'])
+@login_required
+def api_search():
+    query = request.args.get('q', '').strip().lower()
+    
+    # --- Advanced Filters ---
+    # Date: 'start' and 'end' in YYYY-MM-DD format, or 'all'
+    date_type = request.args.get('date_type', 'all') # 'all', 'range', 'single'
+    start_date_str = request.args.get('start_date', '')
+    end_date_str = request.args.get('end_date', '')
+    
+    # Categories: comma-separated list (e.g., "sales,banking")
+    categories_str = request.args.get('categories', '')
+    categories = [c.lower() for c in categories_str.split(',') if c.strip()]
+    
+    # Payment Modes: comma-separated
+    payment_modes_str = request.args.get('payment_modes', '')
+    payment_modes = [p.lower() for p in payment_modes_str.split(',') if p.strip()]
+
+    if not query and not (categories or payment_modes or date_type != 'all'):
+         return jsonify({"results": [], "summary": {"total_count": 0, "total_value": 0}})
+
+    results = []
+    total_value = 0.0
+    
+    excel_exts = ('.xlsx', '.xls', '.xlsm', '.xlsb', '.csv')
+    
+    # Date parsing helper
+    start_dt = None
+    end_dt = None
+    if date_type in ('range', 'single') and start_date_str:
+        try:
+            start_dt = datetime.strptime(start_date_str, '%Y-%m-%d')
+            if date_type == 'range' and end_date_str:
+                 end_dt = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) # Include end date
+            elif date_type == 'single':
+                 end_dt = start_dt + timedelta(days=1)
+            else:
+                 end_dt = start_dt + timedelta(days=1) # Fallback for open-ended range
+        except Exception:
+            pass
+
+    if os.path.exists(UPLOAD_FOLDER):
+        for root, dirs, files in os.walk(UPLOAD_FOLDER):
+            for file in files:
+                if file.endswith('.log'): continue
+                
+                lower_file = file.lower()
+                path = os.path.join(root, file)
+                rel_path = os.path.relpath(path, UPLOAD_FOLDER)
+                
+                # --- 1. Category Filter (Filename based) ---
+                if categories:
+                    # Categories: sales, advances, banking
+                    # Heuristics:
+                    is_sales = 'sales' in lower_file
+                    is_advances = 'advances' in lower_file or 'ad-' in lower_file
+                    is_banking = 'bank' in lower_file or 'collection' in lower_file or 'statement' in lower_file
+                    
+                    matched_category = False
+                    if 'sales' in categories and is_sales: matched_category = True
+                    if 'advances' in categories and is_advances: matched_category = True
+                    if 'banking' in categories and is_banking: matched_category = True
+                    
+                    if not matched_category: continue
+
+                # --- 2. Date Filter (File Modification Time) ---
+                # NOTE: For deep searching, we might ideally check DATES INSIDE the file, 
+                # but for global search, file mod time is the standard "file date".
+                if start_dt and end_dt:
+                    mtime = datetime.fromtimestamp(os.path.getmtime(path))
+                    if not (start_dt <= mtime < end_dt):
+                        continue
+
+                # --- Search Logic ---
+                if lower_file.endswith(excel_exts):
+                    try:
+                        dfs = {}
+                        if lower_file.endswith('.csv'):
+                            dfs['Sheet1'] = pd.read_csv(path, dtype=str, on_bad_lines='skip', nrows=5000)
+                        else:
+                            xls = pd.ExcelFile(path)
+                            for sheet_name in xls.sheet_names:
+                                dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name, dtype=str, nrows=2000)
+                        
+                        for sheet, df in dfs.items():
+                             # Standardize columns for payment mode check
+                             df_upper = df.copy()
+                             df_upper.columns = df_upper.columns.astype(str).str.upper().str.strip()
+                             
+                             # Payment Mode Filter
+                             if payment_modes:
+                                 # Find payment mode column
+                                 pm_col = next((c for c in df_upper.columns if 'PAYMENT' in c or 'MOP' in c or 'MODE' in c), None)
+                                 if pm_col:
+                                     # Filter DF
+                                     # Check if any of the payment_modes exists in the cell value
+                                     mask = df_upper[pm_col].astype(str).str.lower().apply(lambda x: any(pm in x for pm in payment_modes))
+                                     df = df[mask]
+                                     df_upper = df_upper[mask]
+                             
+                             if df.empty: continue
+
+                             # Text Query Filter
+                             if query:
+                                 mask = df.apply(lambda x: x.astype(str).str.lower().str.contains(query, na=False))
+                                 matched_rows = df[mask.any(axis=1)]
+                             else:
+                                 matched_rows = df # Return all if only filtering by cat/mode
+                             
+                             if matched_rows.empty: continue
+
+                             # Calculate Value (Heuristic)
+                             amount_col = next((c for c in df_upper.columns if 'AMOUNT' in c or 'TOTAL' in c or 'NET' in c or 'VALUE' in c), None)
+                             
+                             for idx, row in matched_rows.head(10).iterrows(): # Limit 10 to UI
+                                 # Highlight snippet
+                                 match_details = "Matched Filters"
+                                 if query:
+                                     matched_cols = [col for col in df.columns if query in str(row[col]).lower()]
+                                     match_details = f"Matched in: {', '.join(matched_cols)}"
+                                 
+                                 # Add to total value
+                                 if amount_col:
+                                     try:
+                                         val = float(str(row.get(df.columns[df_upper.columns.get_loc(amount_col)])).replace(',','').strip())
+                                         total_value += val
+                                     except:
+                                         pass
+
+                                 results.append({
+                                     "type": "excel_row",
+                                     "name": file,
+                                     "path": rel_path,
+                                     "sheet": sheet,
+                                     "row_index": idx + 2,
+                                     "match_type": match_details,
+                                     "data": row.fillna('').to_dict()
+                                 })
+                            
+                             # If query is empty but filters active, assume we want value of all filtered rows
+                             if not query and amount_col:
+                                  # Sum remaining rows not just the head(10)
+                                  remaining = matched_rows.iloc[10:]
+                                  for idx, row in remaining.iterrows():
+                                      try:
+                                          val = float(str(row.get(df.columns[df_upper.columns.get_loc(amount_col)])).replace(',','').strip())
+                                          total_value += val
+                                      except: pass
+                                      
+                    except Exception as e:
+                        print(f"Error searching excel {file}: {e}")
+
+    return jsonify({
+        "results": results, 
+        "summary": {
+            "total_count": len(results),
+            "total_value": total_value
+        }
+    })
+
+@app.route('/api/search/export', methods=['GET'])
+@login_required
+def api_search_export():
+    """Export search results to Excel."""
+    # Reuse logic from api_search but return file
+    # For brevity, I'll copy the core logic. In refactoring, this should be a shared function.
+    query = request.args.get('q', '').strip().lower()
+    date_type = request.args.get('date_type', 'all') 
+    start_date_str = request.args.get('start_date', '')
+    end_date_str = request.args.get('end_date', '')
+    categories_str = request.args.get('categories', '')
+    categories = [c.lower() for c in categories_str.split(',') if c.strip()]
+    payment_modes_str = request.args.get('payment_modes', '')
+    payment_modes = [p.lower() for p in payment_modes_str.split(',') if p.strip()]
+
+    all_rows = []
+    
+    excel_exts = ('.xlsx', '.xls', '.xlsm', '.xlsb', '.csv')
+    
+    from datetime import datetime, timedelta
+    start_dt = None
+    end_dt = None
+    if date_type in ('range', 'single') and start_date_str:
+        try:
+            start_dt = datetime.strptime(start_date_str, '%Y-%m-%d')
+            if date_type == 'range' and end_date_str:
+                 end_dt = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
+            else:
+                 end_dt = start_dt + timedelta(days=1)
+        except Exception: pass
+
+    if os.path.exists(UPLOAD_FOLDER):
+        for root, dirs, files in os.walk(UPLOAD_FOLDER):
+            for file in files:
+                if file.endswith('.log'): continue
+                path = os.path.join(root, file)
+                lower_file = file.lower()
+                
+                if categories:
+                    is_sales = 'sales' in lower_file
+                    is_advances = 'advances' in lower_file or 'ad-' in lower_file
+                    is_banking = 'bank' in lower_file or 'collection' in lower_file
+                    matched_category = False
+                    if 'sales' in categories and is_sales: matched_category = True
+                    if 'advances' in categories and is_advances: matched_category = True
+                    if 'banking' in categories and is_banking: matched_category = True
+                    if not matched_category: continue
+
+                if start_dt and end_dt:
+                    mtime = datetime.fromtimestamp(os.path.getmtime(path))
+                    if not (start_dt <= mtime < end_dt): continue
+
+                if lower_file.endswith(excel_exts):
+                    try:
+                        dfs = {}
+                        if lower_file.endswith('.csv'):
+                             dfs['Sheet1'] = pd.read_csv(path, dtype=str, on_bad_lines='skip')
+                        else:
+                             xls = pd.ExcelFile(path)
+                             for sheet_name in xls.sheet_names:
+                                 dfs[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name, dtype=str)
+                        
+                        for sheet, df in dfs.items():
+                             df_upper = df.copy()
+                             df_upper.columns = df_upper.columns.astype(str).str.upper().str.strip()
+                             
+                             if payment_modes:
+                                 pm_col = next((c for c in df_upper.columns if 'PAYMENT' in c or 'MOP' in c or 'MODE' in c), None)
+                                 if pm_col:
+                                     mask = df_upper[pm_col].astype(str).str.lower().apply(lambda x: any(pm in x for pm in payment_modes))
+                                     df = df[mask]
+                             
+                             if df.empty: continue
+
+                             if query:
+                                 mask = df.apply(lambda x: x.astype(str).str.lower().str.contains(query, na=False))
+                                 matched_rows = df[mask.any(axis=1)]
+                             else:
+                                 matched_rows = df
+                             
+                             if matched_rows.empty: continue
+                             
+                             # Add source metadata
+                             matched_rows = matched_rows.copy()
+                             matched_rows.insert(0, 'Source File', file)
+                             matched_rows.insert(1, 'Source Sheet', sheet)
+                             all_rows.append(matched_rows)
+
+                    except Exception: pass
+    
+    if not all_rows:
+        return jsonify({"error": "No data found to export"}), 404
+        
+    final_df = pd.concat(all_rows, ignore_index=True)
+    
+    output_buffer = io.BytesIO()
+    final_df.to_excel(output_buffer, index=False, engine='openpyxl')
+    output_buffer.seek(0)
+    
+    return send_file(
+        output_buffer,
+        as_attachment=True,
+        download_name=f"Search_Results_{int(time.time())}.xlsx",
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+        
+# --- 14. SEARCH DASHBOARD ROUTES & LOGIC ---
+
+@app.route('/admin/save_search_file', methods=['POST'])
+@login_required
+def save_search_file():
+    if not current_user.is_admin: abort(403)
+    file = request.files.get('search_file')
+    if not file:
+        flash('No file selected.', 'error')
+        return redirect(url_for('admin_portal', tab='SearchConfig'))
+    
+    filename = file.filename
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in ['.xlsx', '.xls', '.xlsb', '.csv']:
+        flash('Unsupported file type.', 'error')
+        return redirect(url_for('admin_portal', tab='SearchConfig'))
+
+    # Clear existing file
+    existing = db.session.execute(db.select(SearchFile)).scalar_one_or_none()
+    if existing:
+        try:
+            if os.path.exists(existing.filepath):
+                os.remove(existing.filepath)
+            db.session.delete(existing)
+        except Exception: pass
+    
+    # Save new file
+    safe_filename = f"search_master_{uuid.uuid4().hex}{ext}"
+    filepath = os.path.join(UPLOAD_FOLDER, safe_filename)
+    file.save(filepath)
+    
+    new_file = SearchFile(filename=filename, filepath=filepath)
+    db.session.add(new_file)
+    db.session.commit()
+    
+    flash(f'Search file "{filename}" uploaded successfully.', 'success')
+    return redirect(url_for('admin_portal', tab='SearchConfig'))
+
+@app.route('/admin/delete_search_file')
+@login_required
+def delete_search_file():
+    if not current_user.is_admin: abort(403)
+    existing = db.session.execute(db.select(SearchFile)).scalar_one_or_none()
+    if existing:
+        try:
+            if os.path.exists(existing.filepath):
+                os.remove(existing.filepath)
+        except Exception: pass
+        db.session.delete(existing)
+        db.session.commit()
+        flash('Search file deleted.', 'success')
+    else:
+        flash('No search file to delete.', 'info')
+    return redirect(url_for('admin_portal', tab='SearchConfig'))
+
+@app.route('/admin/save_search_rule', methods=['POST'])
+@login_required
+def save_search_rule():
+    if not current_user.is_admin: abort(403)
+    rule_type = request.form.get('rule_type') # 'category' or 'payment_mode'
+    
+    if rule_type == 'category':
+        name = request.form.get('category_name')
+        sheet = request.form.get('sheet_name')
+        if name and sheet:
+            # unique check
+            existing = db.session.execute(db.select(SearchCategoryRule).filter_by(category_name=name)).scalar_one_or_none()
+            if existing: existing.sheet_name = sheet
+            else: db.session.add(SearchCategoryRule(category_name=name, sheet_name=sheet))
+            db.session.commit()
+            flash(f'Category "{name}" Saved.', 'success')
+
+    elif rule_type == 'payment_mode':
+        name = request.form.get('mode_name')
+        cols = request.form.get('columns')
+        sheet_name = request.form.get('sheet_name', '').strip() or None
+        
+        if name and cols:
+            # Always add new rule (since mode_name is not unique anymore)
+            # Users can delete old rules if they want to change them
+            db.session.add(SearchPaymentModeRule(mode_name=name, columns=cols, sheet_name=sheet_name))
+            db.session.commit()
+            flash(f'Payment Mode Rule "{name}" Added.', 'success')
+            
+    return redirect(url_for('admin_portal', tab='SearchConfig'))
+
+@app.route('/admin/delete_search_rule/<type>/<int:id>')
+@login_required
+def delete_search_rule(type, id):
+    if not current_user.is_admin: abort(403)
+    if type == 'category':
+        rule = db.session.get(SearchCategoryRule, id)
+    else:
+        rule = db.session.get(SearchPaymentModeRule, id)
+    
+    if rule:
+        db.session.delete(rule)
+        db.session.commit()
+        flash('Rule deleted.', 'success')
+    return redirect(url_for('admin_portal', tab='SearchConfig'))
+
+
+@app.route('/api/search_dashboard', methods=['POST'])
+@login_required
+def search_dashboard_api():
+    query = request.form.get('query', '').strip().lower()
+    categories = request.form.getlist('categories[]') 
+    payment_modes = request.form.getlist('payment_modes[]') 
+    
+    # 1. Get the Active File
+    search_file = db.session.execute(db.select(SearchFile)).scalar_one_or_none()
+    if not search_file or not os.path.exists(search_file.filepath):
+        return jsonify({'error': 'No active search file configured by Admin.'}), 400
+    
+    results = []
+    
+    try:
+        # 2. Determine Sheets to Search based on Categories
+        cat_rules = db.session.execute(db.select(SearchCategoryRule)).scalars().all()
+        sheet_map = {r.category_name: r.sheet_name for r in cat_rules}
+        
+        target_sheets = []
+        if not categories: 
+            target_sheets = list(sheet_map.values())
+        else:
+            for cat in categories:
+                if cat in sheet_map:
+                    target_sheets.append(sheet_map[cat])
+
+        # 3. Determine Columns to Search based on Payment Modes with Sheet context
+        # Fetch all rules first
+        all_mode_rules = db.session.execute(db.select(SearchPaymentModeRule)).scalars().all()
+        
+        # We need to filter which rules apply based on the selected 'payment_modes'
+        # Structure: target_col_specs = [ {'keywords': [], 'sheet_patterns': ['A', 'B'] or None} ]
+        target_col_specs = []
+        
+        if payment_modes:
+            for pm in payment_modes:
+                # Find all rules that match this mode name
+                matching_rules = [r for r in all_mode_rules if r.mode_name == pm]
+                
+                for r in matching_rules:
+                    sheets = None
+                    if r.sheet_name:
+                        sheets = [s.strip().lower() for s in r.sheet_name.split(',') if s.strip()]
+                    
+                    target_col_specs.append({
+                        'keywords': [k.strip().upper() for k in r.columns.split(',')],
+                        'sheet_patterns': sheets 
+                    })
+        
+        # 4. Load File
+        filepath = search_file.filepath
+        
+        xl = pd.ExcelFile(filepath)
+        all_sheets = xl.sheet_names
+        
+        for sheet in all_sheets:
+            # Check if this sheet matches any target sheet pattern (substring match)
+            matched_cat_sheet = next((s for s in target_sheets if str(s).lower() in sheet.lower()), None)
+            
+            if categories and not matched_cat_sheet:
+                continue 
+            
+            # Load sheet
+            df = pd.read_excel(xl, sheet_name=sheet, dtype=str)
+            df.columns = df.columns.astype(str).str.strip()
+            
+            # Filter Columns based on Specs
+            cols_to_search = []
+            matched_col_names = []
+            
+            if target_col_specs:
+                for col in df.columns:
+                    upper_col = col.upper()
+                    
+                    # Check if this column matches ANY spec that is valid for this sheet
+                    # A spec is valid if:
+                    # 1. spec['sheet_patterns'] is None (applies to all sheets)
+                    # 2. OR current sheet matches ANY of the sheet_patterns
+                    
+                    for spec in target_col_specs:
+                        is_sheet_valid = False
+                        if not spec['sheet_patterns']:
+                            is_sheet_valid = True
+                        else:
+                            # Check if current 'sheet' (from file) partially matches any pattern
+                            for pattern in spec['sheet_patterns']:
+                                if pattern in sheet.lower():
+                                    is_sheet_valid = True
+                                    break # Found a matching pattern for this rule
+                            
+                        if is_sheet_valid:
+                            # Check keywords
+                            if any(k in upper_col for k in spec['keywords']):
+                                cols_to_search.append(col)
+                                matched_col_names.append(col)
+                                break # Matched this column, move to next
+                                
+                if not cols_to_search:
+                     continue 
+            else:
+                cols_to_search = df.columns.tolist()
+            
+            if not query: continue
+            
+            # Subset DF
+            df_subset = df[cols_to_search]
+            
+            # Perform search (case insensitive)
+            mask = df_subset.apply(lambda x: x.astype(str).str.lower().str.contains(query, na=False))
+            matched_indices = df_subset[mask.any(axis=1)].index
+            
+            if len(matched_indices) > 0:
+                # Limit to first 50 matches per sheet
+                for idx in matched_indices[:50]:
+                    row_data = df.iloc[idx].to_dict()
+                    # Find which column matched
+                    matched_cols = []
+                    for col in cols_to_search:
+                        val = str(row_data.get(col, '')).lower()
+                        if query in val:
+                            matched_cols.append(col)
+                    
+                    results.append({
+                        'sheet': sheet,
+                        'row': int(idx) + 2, 
+                        'matched_columns': ', '.join(matched_cols),
+                        'data': row_data
+                    })
+
+        return jsonify({'results': results})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# --- 15. SPLIT FILE ROUTE ---
+@app.route('/process-split-file', methods=['POST'])
+@login_required
+def process_split_file():
+    try:
+        file = request.files.get('split_file')
+        split_col = request.form.get('split_column', 'AMVIAK SPOC').strip()
+        custom_sheet_name = request.form.get('sheet_name', '').strip()
+        
+        if not file: return jsonify({'error': 'No file uploaded'}), 400
+        
+        target_sheet = custom_sheet_name if custom_sheet_name else "Reconciliation by Date by Store"
+        
+        try:
+            filename = file.filename.lower()
+            df = None
+            if filename.endswith(('.xlsx', '.xls', '.xlsb', '.xlsm')):
+                 xl = pd.ExcelFile(file)
+                 sheet_to_use = None
+                 
+                 # Resolve sheet name
+                 if custom_sheet_name and custom_sheet_name in xl.sheet_names:
+                     sheet_to_use = custom_sheet_name
+                 elif "Reconciliation by Date by Store" in xl.sheet_names:
+                     sheet_to_use = "Reconciliation by Date by Store"
+                 else:
+                     sheet_to_use = xl.sheet_names[0] 
+                 
+                 # Logic to find header row for the column
+                 preview = pd.read_excel(xl, sheet_name=sheet_to_use, nrows=10, header=None)
+                 header_row_idx = -1
+                 for i, row in preview.iterrows():
+                     row_str = row.astype(str).str.upper().tolist()
+                     if split_col.upper() in row_str:
+                         header_row_idx = i
+                         break
+                 
+                 if header_row_idx == -1: header_row_idx = 1
+                 
+                 df = pd.read_excel(xl, sheet_name=sheet_to_use, header=header_row_idx, dtype=str)
+                 
+            elif filename.endswith('.csv'):
+                 df = pd.read_csv(file, dtype=str) 
+            
+            if df is None: return jsonify({'error': 'Unsupported file'}), 400
+            
+            df.columns = df.columns.astype(str).str.strip()
+            
+            real_col = next((c for c in df.columns if c.upper() == split_col.upper()), None)
+            if not real_col:
+                return jsonify({'error': f'Column "{split_col}" not found in sheet.'}), 400
+                
+            unique_vals = df[real_col].dropna().unique()
+            
+            output_zip = io.BytesIO()
+            import zipfile
+            with zipfile.ZipFile(output_zip, 'w') as zf:
+                for val in unique_vals:
+                    val_str = str(val).strip()
+                    if not val_str: continue
+                    
+                    sub_df = df[df[real_col] == val]
+                    
+                    buf = io.BytesIO()
+                    with pd.ExcelWriter(buf, engine='xlsxwriter') as writer:
+                        sub_df.to_excel(writer, index=False, sheet_name='Sheet1')
+                    
+                    safe_val = "".join([c for c in val_str if c.isalpha() or c.isdigit() or c==' ']).strip()
+                    zf.writestr(f"{safe_val}.xlsx", buf.getvalue())
+            
+            output_zip.seek(0)
+            return send_file(output_zip, as_attachment=True, download_name="Split_Files.zip", mimetype='application/zip')
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# --- 16. RUN THE APP (FINAL) ---
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_default_data()
-    # --- UPDATED: Use environment variables for production deployment ---
-    port = int(os.environ.get('PORT', 5001))
-    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    # --- UPDATED: Added host='0.0.0.0' ---
+    app.run(host='0.0.0.0', port=5001, debug=True)
